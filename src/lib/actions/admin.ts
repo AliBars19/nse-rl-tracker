@@ -576,6 +576,8 @@ const SeasonZ = z.object({
   name: z.string().trim().min(3),
   shortName: z.string().trim().min(2),
   makeCurrent: z.boolean(),
+  /** When making the new season current, also mark the old current season as finished. */
+  finishPrevious: z.boolean().default(true),
   champions: z.object({ tier: TierZ, tournament: z.string().trim() }),
   commanders: z.object({ tier: TierZ, tournament: z.string().trim() }),
 });
@@ -584,9 +586,12 @@ export async function createSeason(input: z.infer<typeof SeasonZ>): Promise<Acti
   try {
     const data = SeasonZ.parse(input);
     const { db, ds } = await adminDataset();
+    let finished: string | null = null;
     if (data.makeCurrent) {
-      const { error } = await db.from("seasons").update({ is_current: false }).eq("is_current", true);
+      const patch = data.finishPrevious ? { is_current: false, is_finished: true } : { is_current: false };
+      const { data: prev, error } = await db.from("seasons").update(patch).eq("is_current", true).select("name");
       if (error) throw error;
+      if (data.finishPrevious && prev?.length) finished = prev.map((p) => p.name as string).join(", ");
     }
     const { data: season, error } = await db
       .from("seasons")
@@ -610,7 +615,27 @@ export async function createSeason(input: z.infer<typeof SeasonZ>): Promise<Acti
       }
     }
     refreshSite();
-    return { ok: true, message: `${data.name} created${data.makeCurrent ? " and set as current" : ""}.` };
+    return {
+      ok: true,
+      message: `${data.name} created${data.makeCurrent ? " and set as current" : ""}${finished ? `; ${finished} marked as finished` : ""}.`,
+    };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** Make one season the current one (where '/' lists first and new admin entries go). */
+export async function setCurrentSeason(seasonId: string): Promise<ActionResult> {
+  try {
+    const id = z.string().uuid().parse(seasonId);
+    const { db } = await adminDataset();
+    // One current season at a time (partial unique index): clear first, then set.
+    const { error: e1 } = await db.from("seasons").update({ is_current: false }).eq("is_current", true);
+    if (e1) throw e1;
+    const { data, error: e2 } = await db.from("seasons").update({ is_current: true }).eq("id", id).select("name").single();
+    if (e2) throw e2;
+    refreshSite();
+    return { ok: true, message: `${data.name} is now the current season.` };
   } catch (e) {
     return fail(e);
   }

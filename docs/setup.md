@@ -69,6 +69,6 @@ ballchasing is treated as success.
 ## New season
 
 Admin → Overview → **New season**: name, slug, each team's starting tier and NSE tournament
-slug. Rosters are copied over. Then add a ruleset for the new season in
+slug. Rosters are copied over, and (by default) the old current season is marked finished. The **Seasons** list on the Overview lets you mark any season finished / in progress or make it current. Then add a ruleset for the new season in
 `src/lib/engine/rulesets.ts` if the ladders changed (otherwise the latest known one is reused
 and marked "derived"), and check the sheet column layout in `src/lib/import/sheet.ts`.

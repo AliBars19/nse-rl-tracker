@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createSeason, setSeasonFinished } from "@/lib/actions/admin";
+import { createSeason, setCurrentSeason, setSeasonFinished } from "@/lib/actions/admin";
 import { useAction } from "./ActionForm";
 import { Field, inputCls, PrimaryButton, SecondaryButton } from "./ui";
 
@@ -11,25 +11,56 @@ const TIERS = [
   ["swiss", "Swiss"],
 ] as const;
 
-export function SeasonFinishedToggle({ seasonId, finished }: { seasonId: string; finished: boolean }) {
+export interface SeasonRow {
+  id: string;
+  name: string;
+  isCurrent: boolean;
+  isFinished: boolean;
+}
+
+/** Every season with its own Finished / In progress toggle and a "Make current" button. */
+export function SeasonsList({ seasons }: { seasons: SeasonRow[] }) {
   const a = useAction();
   return (
-    <div className="flex flex-col gap-2">
-      <SecondaryButton type="button" disabled={a.pending} onClick={() => a.run(() => setSeasonFinished({ seasonId, finished: !finished }))}>
-        {finished ? "Mark season as in progress" : "Mark season as finished"}
-      </SecondaryButton>
+    <div className="flex flex-col gap-3">
+      <ul className="flex flex-col border border-line">
+        {seasons.map((s) => (
+          <li key={s.id} className="flex flex-wrap items-center gap-3 border-b border-divider p-3 last:border-b-0">
+            <span className="flex min-w-48 grow flex-col gap-1">
+              <strong className="text-[15px]">{s.name}</strong>
+              <span className="flex flex-wrap gap-2 text-xs">
+                {s.isCurrent && <span className="bg-accent px-2 py-[2px] font-display font-bold tracking-[0.12em] text-on-accent">CURRENT</span>}
+                <span className="bg-line px-2 py-[2px] font-display font-bold tracking-[0.12em] text-text-2">{s.isFinished ? "FINISHED" : "IN PROGRESS"}</span>
+              </span>
+            </span>
+            <SecondaryButton type="button" disabled={a.pending} onClick={() => a.run(() => setSeasonFinished({ seasonId: s.id, finished: !s.isFinished }))}>
+              {s.isFinished ? "Mark in progress" : "Mark finished"}
+            </SecondaryButton>
+            {!s.isCurrent && (
+              <SecondaryButton type="button" disabled={a.pending} onClick={() => a.run(() => setCurrentSeason(s.id))}>
+                Make current
+              </SecondaryButton>
+            )}
+          </li>
+        ))}
+      </ul>
       {a.message}
+      <p className="m-0 text-xs text-muted">
+        The current season is listed first on the home page, and the admin pages (Nights, Imports, Replays…) edit it.
+        Finished seasons say “Finished 6th”; in-progress ones say “Currently 6th”.
+      </p>
     </div>
   );
 }
 
-export function NewSeasonForm() {
+export function NewSeasonForm({ currentName }: { currentName: string | null }) {
   const a = useAction();
   const [f, setF] = useState({
     slug: "",
     name: "",
     shortName: "",
     makeCurrent: true,
+    finishPrevious: true,
     champions: { tier: "div2" as "div1" | "div2" | "swiss", tournament: "" },
     commanders: { tier: "swiss" as "div1" | "div2" | "swiss", tournament: "" },
   });
@@ -66,8 +97,14 @@ export function NewSeasonForm() {
       ))}
       <label className="flex min-h-11 items-center gap-3 text-sm md:col-span-2">
         <input type="checkbox" className="h-5 w-5 accent-[var(--accent)]" checked={f.makeCurrent} onChange={(e) => setF({ ...f, makeCurrent: e.target.checked })} />
-        Make this the current season (the home page opens it)
+        Make this the current season (listed first on the home page; the admin pages edit it)
       </label>
+      {currentName && f.makeCurrent && (
+        <label className="flex min-h-11 items-center gap-3 text-sm md:col-span-2">
+          <input type="checkbox" className="h-5 w-5 accent-[var(--accent)]" checked={f.finishPrevious} onChange={(e) => setF({ ...f, finishPrevious: e.target.checked })} />
+          Mark {currentName} as finished
+        </label>
+      )}
       <div className="flex flex-col gap-3 md:col-span-2">
         <PrimaryButton type="submit" pending={a.pending} className="self-start">Create season</PrimaryButton>
         {a.message}
