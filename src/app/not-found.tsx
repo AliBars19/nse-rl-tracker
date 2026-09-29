@@ -11,7 +11,7 @@ export default function NotFound() {
         <span className="clip-para-sm bg-accent px-[14px] py-[6px] font-display text-[13px] font-bold tracking-[0.14em] text-on-accent">404</span>
         <h1 className="m-0 font-display text-5xl font-bold uppercase">Not found</h1>
         <p className="m-0 text-text-3">That season, team, opponent or night is not in the tracker.</p>
-        <Link href="/">Go to the current season</Link>
+        <Link href="/">Pick a season</Link>
       </main>
     </div>
   );

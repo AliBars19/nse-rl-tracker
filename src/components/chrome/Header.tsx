@@ -18,13 +18,13 @@ export function Header({
   return (
     <>
       <header className="hidden h-[72px] shrink-0 items-center justify-between border-b border-line bg-header px-12 lg:flex">
-        <Logo href={base} />
+        <Logo href="/" />
         <NavLinks base={base} variant="bar" />
         <SeasonSelect seasons={seasons} current={season} />
       </header>
       <div className="relative lg:hidden">
         <header className="flex h-[60px] items-center justify-between border-b border-line bg-header px-4">
-          <Logo href={base} compact />
+          <Logo href="/" compact />
           <MobileMenu seasons={seasons} current={season} isAdmin={isAdmin} />
         </header>
         <NavLinks base={base} variant="tabs" />
