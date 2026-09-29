@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AdminCard, Notice } from "@/components/admin/ui";
-import { NewSeasonForm, SeasonFinishedToggle } from "@/components/admin/SeasonForm";
+import { NewSeasonForm, SeasonsList } from "@/components/admin/SeasonForm";
 import { adminDataset } from "@/lib/data/admin";
 import { ctxOf, seasonSeries } from "@/lib/engine/context";
 import { nightsForSeason } from "@/lib/engine/nights";
@@ -16,7 +16,7 @@ export default async function AdminHome() {
     return (
       <AdminCard title="Create the first season" id="first">
         <Notice>The database has no seasons yet. Load supabase/seed.sql for Spring 26, or create a season here.</Notice>
-        <NewSeasonForm />
+        <NewSeasonForm currentName={seasons.find((x) => x.isCurrent)?.name ?? null} />
       </AdminCard>
     );
   }
@@ -63,15 +63,12 @@ export default async function AdminHome() {
         })}
       </div>
 
-      <AdminCard title="Season" id="season">
-        <p className="m-0 text-sm text-text-3">
-          {ds.season.isFinished ? "Finished: the site says “Finished 6th”." : "In progress: the site says “Currently 6th”."}
-        </p>
-        <SeasonFinishedToggle seasonId={ds.season.id} finished={ds.season.isFinished} />
+      <AdminCard title="Seasons" id="seasons">
+        <SeasonsList seasons={seasons.map((x) => ({ id: x.id, name: x.name, isCurrent: x.isCurrent, isFinished: x.isFinished }))} />
       </AdminCard>
 
       <AdminCard title="New season" id="new-season">
-        <NewSeasonForm />
+        <NewSeasonForm currentName={seasons.find((x) => x.isCurrent)?.name ?? null} />
       </AdminCard>
     </>
   );
