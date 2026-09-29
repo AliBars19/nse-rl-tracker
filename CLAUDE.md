@@ -10,3 +10,4 @@
 - Always show a W/L letter with the win/loss colour.
 - Checks before pushing: `npm run typecheck && npm run lint && npm test && npx next build`.
 - Seed data: edit `seed-data/` or `scripts/seed-config.ts`, then `npm run seed:build`.
+- PRs in this repo may be merged automatically once the Vercel check is green and there are no conflicts (Ali, Sept 2026).
