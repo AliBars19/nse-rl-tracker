@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Team dashboard — phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#07090D;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#E8ECF2}
+a{color:#F5B83D}a:hover{color:#FFD27A}
+</style>
+</helmet>
+<div style="width: 390px; height: 2980px; box-sizing: border-box; background: #0B0E14; color: #E8ECF2; font-family: 'IBM Plex Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+
+<header style="height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #1F2633; background: #080A0F">
+<div style="display: flex; align-items: center; gap: 10px">
+<div style="width: 26px; height: 26px; background: {{accent}}; clip-path: polygon(25% 0, 100% 0, 75% 100%, 0 100%)"></div>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.1em">CITY ESPORTS</span>
+</div>
+<button type="button" aria-label="Open menu" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid #2A3342; color: #E8ECF2; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"></path></svg>
+</button>
+</header>
+
+<nav style="display: flex; border-bottom: 1px solid #1F2633; background: #080A0F" aria-label="Main">
+<a href="Mobile.dc.html" style="flex-grow: 1; height: 48px; display: flex; align-items: center; justify-content: center; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.08em; color: #E8ECF2; text-decoration: none; border-bottom: 3px solid {{accent}}">DASHBOARD</a>
+<a href="Scouting.dc.html" style="flex-grow: 1; height: 48px; display: flex; align-items: center; justify-content: center; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.08em; color: #8B95A7; text-decoration: none; border-bottom: 3px solid transparent">SCOUTING</a>
+<a href="Series.dc.html" style="flex-grow: 1; height: 48px; display: flex; align-items: center; justify-content: center; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.08em; color: #8B95A7; text-decoration: none; border-bottom: 3px solid transparent">MATCHES</a>
+<a href="Players.dc.html" style="flex-grow: 1; height: 48px; display: flex; align-items: center; justify-content: center; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.08em; color: #8B95A7; text-decoration: none; border-bottom: 3px solid transparent">PLAYERS</a>
+</nav>
+
+<main style="flex-grow: 1; padding: 20px 16px 32px; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px" role="group" aria-label="Team">
+<button type="button" style="height: 44px; background: {{accent}}; color: #0B0E14; border: none; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; cursor: pointer">CHAMPIONS · DIV 2</button>
+<button type="button" style="height: 44px; background: #121722; color: #C4CCD8; border: none; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.06em; cursor: pointer">COMMANDERS · SWISS</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 44px; line-height: 0.95; text-transform: uppercase">City Champions</h1>
+<p style="margin: 0; font-size: 15px; color: #A7B0BF; line-height: 1.45">NSE Spring 26 · Division 2 · Lost Last 16 2–4 to Portsmouth Pirates</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="padding: 16px; background: #121722; border: 1px solid #1F2633; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 11px; letter-spacing: 0.16em; color: #8B95A7">FINAL RANK</span>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 48px; line-height: 1">6<span style="font-size: 18px; color: #8B95A7">/16</span></span>
+</div>
+<div style="padding: 16px; background: {{accent}}; color: #0B0E14; display: flex; flex-direction: column; gap: 4px; clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px))">
+<span style="font-size: 11px; letter-spacing: 0.16em; font-weight: 600">POINTS</span>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 48px; line-height: 1">20</span>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{tiles}}" as="t" hint-placeholder-count="4">
+<div style="padding: 14px 16px; background: #121722; border: 1px solid #1F2633; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 11px; letter-spacing: 0.14em; color: #8B95A7; text-transform: uppercase">{{t.label}}</span>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.1">{{t.value}}</span>
+<span style="font-size: 12px; color: #A7B0BF">{{t.note}}</span>
+</div>
+</sc-for>
+</div>
+
+<div style="background: #121722; border: 1px solid #1F2633; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.06em">FORM</h2>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{form}}" as="f" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+<span style="width: 100%; height: 44px; display: flex; align-items: center; justify-content: center; background: {{f.color}}; color: #0B0E14; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 20px">{{f.res}}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A7B0BF">{{f.score}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.06em">LEAGUE NIGHTS</h2>
+<sc-for list="{{weeks}}" as="wk" hint-placeholder-count="4">
+<div style="background: #121722; border: 1px solid #1F2633">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #1F2633">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 17px">{{wk.name}}</span>
+<span style="font-size: 12px; color: #8B95A7">{{wk.date}} · {{wk.path}}</span>
+</div>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 30px; color: {{accent}}">+{{wk.pts}}</span>
+</div>
+<sc-for list="{{wk.rounds}}" as="r" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; align-items: center; min-height: 56px; padding: 0 16px; border-bottom: 1px solid #1A202B; border-left: 3px solid {{r.color}}">
+<span style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 11px; letter-spacing: 0.12em; color: #8B95A7; text-transform: uppercase">{{r.label}}</span>
+<span style="font-size: 15px; font-weight: 600">{{r.opp}}</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; color: {{r.color}}">{{r.res}} {{r.score}}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</section>
+
+<section style="background: #121722; border: 1px solid #1F2633">
+<div style="padding: 14px 16px; border-bottom: 1px solid #1F2633; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h2 style="margin: 0; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.06em">SCENARIOS</h2>
+<span style="padding: 3px 8px; background: #1F2633; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.12em; color: #C4CCD8">WEEK 6 PREVIEW</span>
+</div>
+<span style="font-size: 12px; color: #8B95A7">Going in: joint 5th · 14 pts</span>
+</div>
+<div style="margin: 14px 16px; padding: 12px 14px; background: #1A1F12; border: 1px solid #5C4A1C; font-size: 14px; line-height: 1.45">Win all three rounds, starting with <strong>Trent Thunders</strong>, and you are <strong style="color: {{accent}}">promoted to Division 1</strong>.</div>
+<sc-for list="{{scen}}" as="o" hint-placeholder-count="6">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 48px 64px; align-items: center; gap: 8px; min-height: 56px; padding: 0 16px; background: {{o.bg}}; border-top: 1px solid #1A202B; border-left: 3px solid {{o.color}}">
+<span style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14px; font-weight: 600">{{o.label}}</span>
+<span style="font-size: 12px; font-weight: 600; color: {{o.color}}">{{o.effect}}</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 14px; color: {{accent}}; text-align: right">+{{o.pts}}</span>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 17px; text-align: right">{{o.total}}</span>
+</div>
+</sc-for>
+</section>
+
+<section style="background: #121722; border: 1px solid #1F2633">
+<div style="padding: 14px 16px; border-bottom: 1px solid #1F2633; display: flex; justify-content: space-between; align-items: baseline">
+<h2 style="margin: 0; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.06em">DIVISION 2</h2>
+<span style="font-size: 12px; color: #8B95A7">Top 8 · pts</span>
+</div>
+<sc-for list="{{table}}" as="row" hint-placeholder-count="8">
+<div style="display: grid; grid-template-columns: 36px minmax(0, 1fr) 44px; align-items: center; height: 44px; padding: 0 16px; background: {{row.bg}}; border-bottom: 1px solid #1A202B; border-left: 3px solid {{row.edge}}">
+<span style="font-family: 'IBM Plex Mono', monospace; color: #A7B0BF">{{row.pos}}</span>
+<span style="font-size: 14px; font-weight: {{row.weight}}; color: {{row.nameColor}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{row.team}}</span>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 17px; text-align: right">{{row.total}}</span>
+</div>
+</sc-for>
+<a href="Main.dc.html" style="display: flex; align-items: center; justify-content: center; height: 48px; font-size: 14px; font-weight: 600; text-decoration: none">Full standings</a>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#F5B83D","options":["#F5B83D","#4DA3FF","#FF7A45","#B98CFF"]},"$preview":{"width":390,"height":2980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accent ?? '#F5B83D';
+    const W = '#4DA3FF', L = '#FF7A45';
+    const rd = (label, opp, res, score) => ({ label, opp, res, score, color: res === 'W' ? W : L });
+    const weeks = [
+      { name: 'Week 3', date: '17 Feb', pts: 4, path: '1–1, lost decider', rounds: [rd('Opener', 'Lincoln Swans', 'L', '1–3'), rd('Losers’ match', 'UCL Huzzlingtons', 'W', '3–2'), rd('1–1 decider', 'Royal Bears', 'L', '1–3')] },
+      { name: 'Week 4', date: '24 Feb', pts: 6, path: '1–1, won decider', rounds: [rd('Opener', 'Fake Warwick', 'W', '3–2'), rd('Winners’ match', 'Chargers Green', 'L', '2–3'), rd('1–1 decider', 'Fake Warwick', 'W', 'FF')] },
+      { name: 'Week 5', date: '3 Mar', pts: 4, path: '1–1, lost decider', rounds: [rd('Opener', 'Royal Bears', 'L', '1–3'), rd('Losers’ match', 'Keele Krakens 2nd', 'W', '3–0'), rd('1–1 decider', 'Sussy Staffordians', 'L', '2–3')] },
+      { name: 'Week 6', date: '10 Mar', pts: 6, path: '1–1, won decider', rounds: [rd('Opener', 'Trent Thunders', 'W', '3–2'), rd('Winners’ match', 'Nottthemainteam', 'L', '1–3'), rd('1–1 decider', 'Royal Bears', 'W', '3–2')] }
+    ];
+    const tiles = [
+      { label: 'Series', value: '6–7', note: 'Incl. 1 forfeit win' },
+      { label: 'Games', value: '25–30', note: 'Forfeit excluded' },
+      { label: 'Game 5s', value: '4–2', note: 'Deciders won' },
+      { label: 'Avg / night', value: '5.0', note: 'Best 6 · worst 4' }
+    ];
+    const f = (res, score) => ({ res, score, color: res === 'W' ? W : L });
+    const form = [f('L', '2–4'), f('W', '3–2'), f('L', '1–3'), f('W', '3–2'), f('L', '2–3')];
+    const t = (pos, team, total) => {
+      const me = team === 'City Champions';
+      return { pos, team, total, bg: me ? '#1A1F12' : 'transparent', edge: me ? accent : 'transparent', weight: me ? '700' : '500', nameColor: me ? accent : '#E8ECF2' };
+    };
+    const table = [
+      t(1, 'Lincoln Swans', 36), t(2, 'Nottingham', 30), t(3, 'Trent Thunders', 24), t(4, 'Portsmouth Pending', 22),
+      t(5, 'Chargers Green', 20), t(6, 'City Champions', 20), t(7, 'Sussy Staffordians', 18), t(8, 'Royal Bears', 18)
+    ];
+    const o = (label, pts, effect, color) => ({ label, pts, total: 14 + pts, effect, color, bg: color === accent ? '#1A1F12' : 'transparent' });
+    const S = '#A7B0BF';
+    const scen = [
+      o('Win all three', 10, 'Promoted to Div 1', accent),
+      o('Win R1 + R2, lose R3', 7, 'Stay in Div 2', S),
+      o('Split R1 + R2, win R3', 6, 'Stay in Div 2', S),
+      o('Split R1 + R2, lose R3', 4, 'Stay in Div 2', S),
+      o('Lose R1 + R2, win R3', 2, 'Stay in Div 2', S),
+      o('Lose all three', 0, 'Relegated to Swiss', L)
+    ];
+    return { accent, weeks, tiles, form, table, scen };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+ "source": "https://tournaments.nse.gg/tournaments/rocket-league-nse-spring-26-division-2/teams/city-champions/matches",
+ "fetchedAt": "2026-09-29T16:52:13.993Z",
+ "rows": [
+  {"id":178799,"time":"19:15","date":"17 Feb 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":"lincoln-swans","name":"Lincoln Swans"},"homeScore":1,"awayScore":3,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":178811,"time":"20:00","date":"17 Feb 26","home":{"slug":"ucl-huzzlingtons","name":"UCL Huzzlingtons"},"away":{"slug":"city-champions","name":"City Champions"},"homeScore":2,"awayScore":3,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":178822,"time":"20:45","date":"17 Feb 26","home":{"slug":"royal-bears--rocket-league-","name":"Royal Bears Rocket league"},"away":{"slug":"city-champions","name":"City Champions"},"homeScore":3,"awayScore":1,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":178833,"time":"22:45","date":"17 Feb 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Points","venue":"Beckwith Park Night"},
+  {"id":180116,"time":"19:15","date":"24 Feb 26","home":{"slug":"fake-warwick","name":"Fake Warwick"},"away":{"slug":"city-champions","name":"City Champions"},"homeScore":2,"awayScore":3,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":180117,"time":"20:00","date":"24 Feb 26","home":{"slug":"chargers-green-","name":"Chargers Green"},"away":{"slug":"city-champions","name":"City Champions"},"homeScore":3,"awayScore":2,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":180130,"time":"20:45","date":"24 Feb 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":"fake-warwick","name":"Fake Warwick"},"homeScore":1,"awayScore":0,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":180140,"time":"22:45","date":"24 Feb 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Points","venue":"Beckwith Park Night"},
+  {"id":181242,"time":"19:15","date":"3 Mar 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":"royal-bears--rocket-league-","name":"Royal Bears Rocket league"},"homeScore":1,"awayScore":3,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":181253,"time":"20:00","date":"3 Mar 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":"keele-krakens-2nd-2025","name":"Keele Krakens 2nd 2025"},"homeScore":3,"awayScore":0,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":181257,"time":"20:45","date":"3 Mar 26","home":{"slug":"sussy-staffordians","name":"Sussy Staffordians"},"away":{"slug":"city-champions","name":"City Champions"},"homeScore":3,"awayScore":2,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":181272,"time":"22:45","date":"3 Mar 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Points","venue":"Beckwith Park Night"},
+  {"id":182310,"time":"19:15","date":"10 Mar 26","home":{"slug":"trent-thunders","name":"Trent Thunders"},"away":{"slug":"city-champions","name":"City Champions"},"homeScore":2,"awayScore":3,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":182315,"time":"20:00","date":"10 Mar 26","home":{"slug":"nottthemainteam","name":"Nottthemainteam"},"away":{"slug":"city-champions","name":"City Champions"},"homeScore":3,"awayScore":1,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":182350,"time":"20:45","date":"10 Mar 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":"royal-bears--rocket-league-","name":"Royal Bears Rocket league"},"homeScore":3,"awayScore":2,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":182360,"time":"22:45","date":"10 Mar 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Points","venue":"Beckwith Park Night"},
+  {"id":183232,"time":"19:15","date":"17 Mar 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Last 32","venue":"Beckwith Park Night"},
+  {"id":183241,"time":"20:15","date":"17 Mar 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":"portsmouth-pirates","name":"Portsmouth Pirates"},"homeScore":2,"awayScore":4,"round":"Last 16","venue":"Beckwith Park Night"}
+ ]
+}

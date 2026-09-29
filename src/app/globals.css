@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens (handoff section 9). Dark esports broadcast style: no rounded corners,
+ * angles come from clip-path. Change --accent here to re-brand (City Esports colours TBC).
+ */
+:root {
+  --bg-page: #07090d;
+  --bg-app: #0b0e14;
+  --bg-header: #080a0f;
+  --panel: #121722;
+  --panel-raised: #161c28;
+  --inset: #0d1118;
+  --border: #1f2633;
+  --border-raised: #3a4556;
+  --divider: #1a202b;
+  --border-strong: #2a3342;
+  --text: #e8ecf2;
+  --text-2: #c4ccd8;
+  --text-3: #a7b0bf;
+  --pattern-text: #d5dbe4;
+  --muted: #8b95a7;
+  --disabled: #5a6475;
+  --accent: #f5b83d;
+  --accent-hover: #ffd27a;
+  --on-accent: #0b0e14;
+  --win: #4da3ff;
+  --loss: #ff7a45;
+  --highlight-bg: #1a1f12;
+  --highlight-border: #5c4a1c;
+}
+
+@theme inline {
+  --color-page: var(--bg-page);
+  --color-app: var(--bg-app);
+  --color-header: var(--bg-header);
+  --color-panel: var(--panel);
+  --color-panel-raised: var(--panel-raised);
+  --color-inset: var(--inset);
+  --color-line: var(--border);
+  --color-line-raised: var(--border-raised);
+  --color-divider: var(--divider);
+  --color-line-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-pattern: var(--pattern-text);
+  --color-muted: var(--muted);
+  --color-disabled: var(--disabled);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-win: var(--win);
+  --color-loss: var(--loss);
+  --color-highlight: var(--highlight-bg);
+  --color-highlight-line: var(--highlight-border);
+
+  --font-display: var(--font-chakra), "Chakra Petch", system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+
+}
+
+@layer base {
+  html {
+    background: var(--bg-page);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg-page);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--accent);
+  }
+  a:hover {
+    color: var(--accent-hover);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------- shapes */
+@utility clip-para {
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+@utility clip-para-sm {
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+@utility clip-para-lg {
+  clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+}
+@utility clip-cut {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+}
+@utility clip-cut-sm {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+@utility clip-logo {
+  clip-path: polygon(25% 0, 100% 0, 75% 100%, 0 100%);
+}
+@utility clip-bar {
+  clip-path: polygon(0 10px, 10px 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* ---------------------------------------------------------------- type */
+@utility label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+@utility h-section {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Keep focus rings visible on clipped buttons (clip-path hides outlines). */
+.clip-para:focus-visible,
+.clip-para-sm:focus-visible,
+.clip-cut:focus-visible {
+  outline: none;
+  filter: drop-shadow(0 0 0 var(--accent)) brightness(1.15);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .transition-soft {
+    transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+}
