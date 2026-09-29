@@ -1,0 +1,28 @@
+{
+ "source": "https://tournaments.nse.gg/tournaments/rocket-league-nse-spring-26/teams/city-commanders/matches",
+ "fetchedAt": "2026-09-29T16:52:21.053Z",
+ "rows": [
+  {"id":176881,"time":"19:15","date":"3 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"ucl-huzzlingtons","name":"UCL Huzzlingtons"},"homeScore":2,"awayScore":3,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":177127,"time":"20:00","date":"3 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"uwe-sea-stags-white","name":"UWE Sea Stags White"},"homeScore":3,"awayScore":0,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":177179,"time":"20:45","date":"3 Feb 26","home":{"slug":"soton-last-dance","name":"Soton Last Dance"},"away":{"slug":"city-commanders","name":"City Commanders"},"homeScore":1,"awayScore":3,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":177849,"time":"19:15","date":"10 Feb 26","home":{"slug":"city-champions","name":"City Champions"},"away":{"slug":"city-commanders","name":"City Commanders"},"homeScore":3,"awayScore":0,"round":"Round 4","venue":"Beckwith Park Night"},
+  {"id":177919,"time":"20:00","date":"10 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"leic-is-more","name":"Leic is More"},"homeScore":0,"awayScore":3,"round":"Round 5","venue":"Beckwith Park Night"},
+  {"id":178102,"time":"20:45","date":"10 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"loughborough-clangerz","name":"Loughborough Clangerz"},"homeScore":2,"awayScore":3,"round":"Round 6","venue":"Beckwith Park Night"},
+  {"id":178995,"time":"19:15","date":"17 Feb 26","home":{"slug":"soton-last-dance","name":"Soton Last Dance"},"away":{"slug":"city-commanders","name":"City Commanders"},"homeScore":2,"awayScore":3,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":179010,"time":"20:00","date":"17 Feb 26","home":{"slug":"dmg","name":"DMG"},"away":{"slug":"city-commanders","name":"City Commanders"},"homeScore":1,"awayScore":3,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":179146,"time":"20:45","date":"17 Feb 26","home":{"slug":"the-cabin","name":"The Cabin"},"away":{"slug":"city-commanders","name":"City Commanders"},"homeScore":3,"awayScore":0,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":179168,"time":"21:30","date":"17 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Promotion Match and Points","venue":"Beckwith Park Night"},
+  {"id":180371,"time":"19:15","date":"24 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"leic-is-more","name":"Leic is More"},"homeScore":1,"awayScore":0,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":180453,"time":"20:00","date":"24 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"da-dragons","name":"DA DRAGONS"},"homeScore":2,"awayScore":3,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":180561,"time":"20:45","date":"24 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"leic-thinky-more-drinky","name":"Leic Thinky More Drinky"},"homeScore":3,"awayScore":2,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":180585,"time":"21:30","date":"24 Feb 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Promotion Match and Points","venue":"Beckwith Park Night"},
+  {"id":181445,"time":"19:15","date":"3 Mar 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"trent-terrors","name":"Trent Terrors"},"homeScore":3,"awayScore":0,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":181535,"time":"20:00","date":"3 Mar 26","home":{"slug":"inazuma-esports","name":"Inazuma Esports"},"away":{"slug":"city-commanders","name":"City Commanders"},"homeScore":3,"awayScore":0,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":181609,"time":"20:45","date":"3 Mar 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"edinb4llers","name":"Edinb4llers"},"homeScore":3,"awayScore":2,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":181634,"time":"21:30","date":"3 Mar 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Promotion Match and Points","venue":"Beckwith Park Night"},
+  {"id":182556,"time":"19:15","date":"10 Mar 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"brighton-pandas","name":"Brighton Pandas"},"homeScore":1,"awayScore":0,"round":"Round 1","venue":"Beckwith Park Night"},
+  {"id":182574,"time":"20:00","date":"10 Mar 26","home":{"slug":"soton-summit","name":"Soton Summit"},"away":{"slug":"city-commanders","name":"City Commanders"},"homeScore":3,"awayScore":1,"round":"Round 2","venue":"Beckwith Park Night"},
+  {"id":182629,"time":"20:45","date":"10 Mar 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":"uwe-sea-stags-red","name":"UWE Sea Stags Red"},"homeScore":3,"awayScore":0,"round":"Round 3","venue":"Beckwith Park Night"},
+  {"id":182654,"time":"22:45","date":"10 Mar 26","home":{"slug":"city-commanders","name":"City Commanders"},"away":{"slug":null,"name":"Bye"},"homeScore":1,"awayScore":0,"round":"Points","venue":"Beckwith Park Night"}
+ ]
+}

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Players — City Champions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#07090D;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#E8ECF2}
+a{color:#F5B83D}a:hover{color:#FFD27A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1400px; box-sizing: border-box; background: #0B0E14; color: #E8ECF2; font-family: 'IBM Plex Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+
+<header style="height: 72px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; border-bottom: 1px solid #1F2633; background: #080A0F">
+<div style="display: flex; align-items: center; gap: 14px">
+<div style="width: 34px; height: 34px; background: {{accent}}; clip-path: polygon(25% 0, 100% 0, 75% 100%, 0 100%)"></div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.1em">CITY ESPORTS</span>
+<span style="font-size: 11px; color: #8B95A7; letter-spacing: 0.18em">ROCKET LEAGUE TRACKER</span>
+</div>
+</div>
+<nav style="display: flex; gap: 8px; height: 72px" aria-label="Main">
+<a href="Main.dc.html" style="display: flex; align-items: center; padding: 0 18px; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: #8B95A7; text-decoration: none; border-bottom: 3px solid transparent">Dashboard</a>
+<a href="Scouting.dc.html" style="display: flex; align-items: center; padding: 0 18px; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: #8B95A7; text-decoration: none; border-bottom: 3px solid transparent">Scouting</a>
+<a href="Series.dc.html" style="display: flex; align-items: center; padding: 0 18px; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: #8B95A7; text-decoration: none; border-bottom: 3px solid transparent">Matches</a>
+<a href="Players.dc.html" style="display: flex; align-items: center; padding: 0 18px; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: #E8ECF2; text-decoration: none; border-bottom: 3px solid {{accent}}">Players</a>
+</nav>
+<button type="button" style="height: 44px; padding: 0 16px; background: #121722; border: 1px solid #2A3342; color: #E8ECF2; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer">NSE Spring 26 ▾</button>
+</header>
+
+<main style="flex-grow: 1; padding: 36px 48px 48px; display: flex; flex-direction: column; gap: 28px">
+
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div style="display: flex; gap: 8px" role="group" aria-label="Team">
+<button type="button" style="height: 44px; padding: 0 18px; background: {{accent}}; color: #0B0E14; border: none; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)">City Champions · Div 2</button>
+<button type="button" style="height: 44px; padding: 0 18px; background: #121722; color: #C4CCD8; border: none; font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)">City Commanders · Swiss</button>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; border: 1px dashed #2A3342">
+<span style="font-size: 13px; color: #A7B0BF">Stats fill in from uploaded replays</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8B95A7">0 / 55 games</span>
+</div>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 18px">
+<h1 style="margin: 0; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 64px; line-height: 1; text-transform: uppercase">Players</h1>
+<span style="font-size: 16px; color: #A7B0BF">5 on the NSE roster · Spring 26</span>
+</div>
+
+<section style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<sc-for list="{{leaders}}" as="l" hint-placeholder-count="4">
+<div style="padding: 20px 22px; background: #121722; border: 1px solid #1F2633; border-top: 3px solid {{accent}}; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; letter-spacing: 0.16em; color: #8B95A7">{{l.label}}</span>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 26px; color: #5A6475">[PLAYER]</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #8B95A7">— {{l.unit}}</span>
+</div>
+</sc-for>
+</section>
+
+<section style="display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 24px; align-items: start">
+
+<div style="background: #121722; border: 1px solid #1F2633">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid #1F2633">
+<h2 style="margin: 0; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.06em; text-transform: uppercase">Leaderboard</h2>
+<div style="display: flex; gap: 6px" role="group" aria-label="Scope">
+<button type="button" style="height: 36px; padding: 0 14px; background: #1F2633; border: 1px solid {{accent}}; color: #E8ECF2; font-size: 13px; font-weight: 600; cursor: pointer">Per game</button>
+<button type="button" style="height: 36px; padding: 0 14px; background: transparent; border: 1px solid #2A3342; color: #A7B0BF; font-size: 13px; font-weight: 500; cursor: pointer">Totals</button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) repeat(7, 64px); padding: 12px 24px; font-size: 12px; letter-spacing: 0.12em; color: #8B95A7; border-bottom: 1px solid #1F2633">
+<span>PLAYER</span><span style="text-align: right">GP</span><span style="text-align: right">SCORE</span><span style="text-align: right">G</span><span style="text-align: right">A</span><span style="text-align: right">SV</span><span style="text-align: right">SH%</span><span style="text-align: right">MVP</span>
+</div>
+<sc-for list="{{roster}}" as="p" hint-placeholder-count="5">
+<button type="button" style="width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) repeat(7, 64px); align-items: center; height: 64px; padding: 0 24px; background: {{p.bg}}; border: none; border-bottom: 1px solid #1A202B; border-left: 4px solid {{p.edge}}; color: #E8ECF2; text-align: left; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif">
+<span style="display: flex; align-items: center; gap: 12px">
+<span style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #1F2633; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 15px">{{p.initial}}</span>
+<span style="display: flex; flex-direction: column">
+<span style="font-size: 15px; font-weight: 600">{{p.name}}</span>
+<span style="font-size: 12px; color: #8B95A7">{{p.role}}</span>
+</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; text-align: right; color: #5A6475">—</span><span style="font-family: 'IBM Plex Mono', monospace; text-align: right; color: #5A6475">—</span><span style="font-family: 'IBM Plex Mono', monospace; text-align: right; color: #5A6475">—</span><span style="font-family: 'IBM Plex Mono', monospace; text-align: right; color: #5A6475">—</span><span style="font-family: 'IBM Plex Mono', monospace; text-align: right; color: #5A6475">—</span><span style="font-family: 'IBM Plex Mono', monospace; text-align: right; color: #5A6475">—</span><span style="font-family: 'IBM Plex Mono', monospace; text-align: right; color: #5A6475">—</span>
+</button>
+</sc-for>
+<div style="padding: 14px 24px; font-size: 12px; color: #8B95A7">Min. 3 games to rank · click a player to open their profile</div>
+</div>
+
+<aside style="background: #121722; border: 1px solid #1F2633; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 16px; padding: 22px 24px; border-bottom: 1px solid #1F2633">
+<span style="width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; background: {{accent}}; color: #0B0E14; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 28px; clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%)">C</span>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 30px; line-height: 1; text-transform: uppercase">Caprillix</span>
+<span style="font-size: 14px; color: #A7B0BF">Team leader · City Champions</span>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: #1F2633; border-bottom: 1px solid #1F2633">
+<sc-for list="{{profile}}" as="s" hint-placeholder-count="6">
+<div style="padding: 16px 18px; background: #121722; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 11px; letter-spacing: 0.14em; color: #8B95A7">{{s}}</span>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 28px; line-height: 1; color: #5A6475">—</span>
+</div>
+</sc-for>
+</div>
+<div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid #1F2633">
+<span style="font-size: 12px; letter-spacing: 0.14em; color: #8B95A7">AVG SCORE BY NIGHT</span>
+<div style="height: 120px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: end; border-bottom: 1px solid #2A3342">
+<sc-for list="{{nights}}" as="n" hint-placeholder-count="4">
+<div style="height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px">
+<div style="width: 60%; height: 70%; border: 1px dashed #2A3342; background: #0D1118"></div>
+</div>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<sc-for list="{{nights}}" as="n" hint-placeholder-count="4">
+<span style="text-align: center; font-size: 12px; color: #A7B0BF; letter-spacing: 0.08em">{{n}}</span>
+</sc-for>
+</div>
+</div>
+<div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12px; letter-spacing: 0.14em; color: #8B95A7">BEST GAME</span>
+<div style="padding: 14px 16px; background: #0D1118; border: 1px dashed #2A3342; display: flex; justify-content: space-between; align-items: center">
+<span style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 15px; font-weight: 600; color: #8B95A7">[OPPONENT] · [WEEK]</span>
+<span style="font-size: 12px; color: #5A6475">— G · — A · — Sv</span>
+</span>
+<span style="font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 26px; color: #5A6475">— pts</span>
+</div>
+</div>
+</aside>
+
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#F5B83D","options":["#F5B83D","#4DA3FF","#FF7A45","#B98CFF"]},"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accent ?? '#F5B83D';
+    const leaders = [
+      { label: 'TOP SCORER', unit: 'goals / game' },
+      { label: 'MOST SAVES', unit: 'saves / game' },
+      { label: 'PLAYMAKER', unit: 'assists / game' },
+      { label: 'HIGHEST AVG SCORE', unit: 'score / game' }
+    ];
+    const r = (name, role, initial, sel) => ({ name, role, initial, bg: sel ? '#1A1F12' : 'transparent', edge: sel ? accent : 'transparent' });
+    const roster = [
+      r('Caprillix', 'Team leader', 'C', true),
+      r('Yams', 'Player', 'Y'),
+      r('kid', 'Player', 'K'),
+      r('Matte', 'Player', 'M'),
+      r('Wasil Barits', 'Player', 'W')
+    ];
+    const profile = ['GAMES', 'GOALS / G', 'ASSISTS / G', 'SAVES / G', 'SHOOTING %', 'MVPS'];
+    const nights = ['WK 3', 'WK 4', 'WK 5', 'WK 6'];
+    return { accent, leaders, roster, profile, nights };
+  }
+}
+</script>
+</body>
+</html>
