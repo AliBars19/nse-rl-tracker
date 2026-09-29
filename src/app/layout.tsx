@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Suspense } from "react";
+import { NavigationOverlay } from "@/components/chrome/NavigationOverlay";
 import "./globals.css";
 
 // Self-hosted (Latin subset, OFL licensed) rather than next/font/google: Vercel's build
@@ -47,7 +49,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-GB" className={`${chakra.variable} ${plexSans.variable} ${plexMono.variable}`}>
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        {children}
+        {/* useSearchParams needs a Suspense boundary so pages can still be prerendered. */}
+        <Suspense fallback={null}>
+          <NavigationOverlay />
+        </Suspense>
+      </body>
     </html>
   );
 }

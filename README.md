@@ -18,7 +18,7 @@ npm test             # engine + importer tests (Vitest)
 npm run typecheck && npm run lint
 ```
 
-With no environment variables the site runs **read-only on the bundled Spring 26 snapshot**
+`/` is a season picker; each season links to both teams. With no environment variables the site runs **read-only on the bundled Spring 26 snapshot**
 (`src/data/seed/spring-26.json`), so every page works straight away. Add Supabase to get the
 admin area: see **[docs/setup.md](docs/setup.md)**.
 
