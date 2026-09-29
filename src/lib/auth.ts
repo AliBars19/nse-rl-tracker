@@ -1,4 +1,5 @@
 import "server-only";
+import { redirect } from "next/navigation";
 import { cache } from "react";
 import { adminEmail, supabaseConfigured } from "@/lib/env";
 import { sessionClient } from "@/lib/supabase/server";
@@ -27,9 +28,12 @@ export const getViewer = cache(async (): Promise<Viewer> => {
   return { signedIn: true, email, isAdmin: !!row && (!gate || gate === email) };
 });
 
-/** For server actions and route handlers: throws unless the caller is an admin. */
+/**
+ * For admin pages, server actions and route handlers. Non-admins are sent to the sign-in
+ * page (route handlers catch this and answer 401).
+ */
 export async function requireAdmin() {
   const viewer = await getViewer();
-  if (!viewer.isAdmin) throw new Error("Not authorised");
+  if (!viewer.isAdmin) redirect("/admin/login");
   return { viewer, db: await sessionClient() };
 }

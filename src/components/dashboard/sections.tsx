@@ -394,11 +394,12 @@ export function Standings({ v, limit, fullHref, className = "hidden lg:block" }:
   const ours = t.rows.find((r) => r.isOurs);
   const shown = limit && t.rows.length > limit ? t.rows.slice(0, limit) : t.rows;
   const rows = ours && !shown.includes(ours) ? [...shown, ours] : shown;
-  const cols = `64px minmax(0,1fr) repeat(${t.weeks.length}, 80px) 100px ${t.rows.some((r) => r.playoffNote) ? "150px" : "0px"}`;
+  const hasPlayoffs = t.rows.some((r) => r.playoffNote);
+  const cols = `64px minmax(0,1fr) repeat(${t.weeks.length}, 80px) 100px${hasPlayoffs ? " 150px" : ""}`;
   return (
     <Panel aria-labelledby="standings" className={className}>
       <PanelHeader id="standings" title={`${v.tierName} standings`} right={<span className="text-[13px] text-muted">Promoted / relegated teams shown as —</span>} />
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} aria-label={`${v.tierName} standings, scrolls sideways`}>
       <div role="table" aria-label={`${v.tierName} standings`} className="min-w-[720px]">
         <div role="row" className="grid border-b border-line px-6 py-3 text-xs tracking-[0.14em] text-muted" style={{ gridTemplateColumns: cols }}>
           <span role="columnheader">POS</span>
@@ -407,7 +408,7 @@ export function Standings({ v, limit, fullHref, className = "hidden lg:block" }:
             <span role="columnheader" key={w.week} className="text-center">{w.label}</span>
           ))}
           <span role="columnheader" className="text-center">TOTAL</span>
-          <span role="columnheader" className="text-right">{t.rows.some((r) => r.playoffNote) ? "PLAYOFFS" : ""}</span>
+          {hasPlayoffs && <span role="columnheader" className="text-right">PLAYOFFS</span>}
         </div>
         {rows.map((row) => (
           <div
@@ -422,7 +423,7 @@ export function Standings({ v, limit, fullHref, className = "hidden lg:block" }:
               <span role="cell" key={w.week} className="text-center font-mono text-text-2">{cellText(row.cells[w.week])}</span>
             ))}
             <span role="cell" className="text-center font-display text-lg font-bold">{row.total}</span>
-            <span role="cell" className="text-right text-[13px] text-text-3">{shortPlayoffNote(row.playoffNote)}</span>
+            {hasPlayoffs && <span role="cell" className="text-right text-[13px] text-text-3">{shortPlayoffNote(row.playoffNote)}</span>}
           </div>
         ))}
       </div>

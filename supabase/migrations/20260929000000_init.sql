@@ -132,6 +132,7 @@ create table games (
   game_number int not null check (game_number >= 1),
   ballchasing_id text unique,
   ballchasing_status text,                       -- 'pending' | 'ok' | 'failed'
+  home_colour text check (home_colour in ('blue', 'orange')),  -- replay colour of the series' home team
   home_goals int,
   away_goals int,
   overtime boolean,

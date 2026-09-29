@@ -24,14 +24,10 @@ import type {
   Series,
   Team,
   TeamSeason,
+  Tier,
 } from "../src/lib/domain/types";
-import {
-  classifyNseRound,
-  looksLikeForfeit,
-  nseDateToIso,
-  nseKickoffToIso,
-  type NseMatchRow,
-} from "../src/lib/import/nse";
+import { classifyNseRound, nseDateToIso, type NseMatchRow } from "../src/lib/import/nse";
+import { rowToSeries } from "../src/lib/import/nse-series";
 import { defaultShortName, nameKey, slugify } from "../src/lib/import/names";
 import { parseStandingsSheet, SPRING_26_LAYOUTS } from "../src/lib/import/sheet";
 import { OUR_TEAMS, SEASON, SHEET_ALIASES, TIERS } from "./seed-config";
@@ -81,51 +77,21 @@ function teamFor(ref: { slug: string | null; name: string }): Team {
   return t;
 }
 
-const isBye = (ref: { slug: string | null; name: string }) => !ref.slug && /^bye$/i.test(ref.name);
-
 // ---------------------------------------------------------------- nights + series
 const nights: Night[] = [];
 const series = new Map<number, Series>();
 const warnings: string[] = [];
 
-function addSeries(row: NseMatchRow, tier: (typeof TIERS)[number]["tier"], night: Night | null) {
-  const kind = classifyNseRound(row.round);
-  const homeBye = isBye(row.home);
-  const awayBye = isBye(row.away);
-
-  // Admin rows: "Points" and "Promotion Match and Points" against a Bye are not matches.
-  if ((kind.kind === "points" || kind.kind === "promotion") && (homeBye || awayBye)) return;
-  if (kind.kind === "unknown") {
-    warnings.push(`Unknown round "${row.round}" in match ${row.id}`);
-    return;
-  }
-  if (homeBye && awayBye) return;
-
-  const stage = kind.kind === "playoff" ? "playoff" : night?.stage ?? "league";
-  const round = kind.kind === "round" ? kind.round : kind.kind === "promotion" ? 4 : null;
-  const home = teamFor(homeBye ? row.away : row.home);
-  const away = homeBye || awayBye ? null : teamFor(row.away);
-  const [homeScore, awayScore] = homeBye ? [row.awayScore, row.homeScore] : [row.homeScore, row.awayScore];
-  const maxScore = Math.max(homeScore ?? 0, awayScore ?? 0);
-  const bestOf = Math.max(5, maxScore * 2 - 1);
-
-  series.set(row.id, {
-    id: uuid("series", row.id),
+function addSeries(row: NseMatchRow, tier: Tier, night: Night | null) {
+  const r = rowToSeries(row, {
     seasonId: season.id,
     tier,
-    nseMatchId: row.id,
-    stage,
-    nightId: stage === "playoff" ? null : night?.id ?? null,
-    round,
-    playoffRound: kind.kind === "playoff" ? kind.playoffRound : null,
-    homeTeamId: home.id,
-    awayTeamId: away?.id ?? null,
-    homeScore: away ? homeScore : null,
-    awayScore: away ? awayScore : null,
-    bestOf,
-    isForfeit: away ? looksLikeForfeit(homeScore, awayScore, bestOf) : false,
-    playedAt: row.date && row.time ? nseKickoffToIso(row.date, row.time) : null,
+    night,
+    teamId: (ref) => teamFor(ref).id,
+    seriesId: (id) => uuid("series", id),
   });
+  if ("series" in r) series.set(row.id, r.series);
+  else if (!/admin points row|bye vs bye/.test(r.skip)) warnings.push(`Match ${row.id}: ${r.skip}`);
 }
 
 for (const t of TIERS) {

@@ -23,8 +23,8 @@ export default async function TeamLayout({ children, params }: LayoutProps<"/[se
       <footer className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-6 text-xs text-muted lg:px-12">
         <span>
           Results from{" "}
-          <a href="https://tournaments.nse.gg" className="text-text-3 hover:text-text">NSE</a> and the NSE standings sheet.
-          Replay stats from <a href="https://ballchasing.com" className="text-text-3 hover:text-text">ballchasing.com</a>.
+          <a href="https://tournaments.nse.gg" className="text-text-3 underline underline-offset-2 hover:text-text">NSE</a> and the NSE standings sheet.
+          Replay stats from <a href="https://ballchasing.com" className="text-text-3 underline underline-offset-2 hover:text-text">ballchasing.com</a>.
           {source === "seed" && " Showing the bundled Spring 26 snapshot."}
         </span>
         <Link href="/admin" className="text-text-3 hover:text-text">

@@ -104,7 +104,7 @@ export function PlayersView({ p, playerSlug, scope }: { p: TeamPage; playerSlug:
               ))}
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} aria-label="Leaderboard, scrolls sideways">
             <div role="table" aria-label="Player leaderboard" className="min-w-[640px]">
               <div role="row" className="grid grid-cols-[minmax(0,1fr)_repeat(7,64px)] border-b border-line px-6 py-3 text-xs tracking-[0.12em] text-muted">
                 <span role="columnheader">PLAYER</span>
@@ -117,21 +117,22 @@ export function PlayersView({ p, playerSlug, scope }: { p: TeamPage; playerSlug:
               {lines.map((l) => {
                 const sel = l === selected;
                 return (
-                  <Link
+                  <div
                     role="row"
                     key={l.player.id}
-                    href={`${base}/${l.player.slug}${q}`}
-                    scroll={false}
                     aria-current={sel ? "true" : undefined}
                     className={
-                      "grid h-16 grid-cols-[minmax(0,1fr)_repeat(7,64px)] items-center border-b border-l-4 border-b-divider px-6 text-text no-underline transition-soft hover:bg-inset hover:text-text " +
+                      "relative grid h-16 grid-cols-[minmax(0,1fr)_repeat(7,64px)] items-center border-b border-l-4 border-b-divider px-6 transition-soft hover:bg-inset " +
                       (sel ? "border-l-accent bg-highlight" : "border-l-transparent")
                     }
                   >
                     <span role="cell" className="flex items-center gap-3">
                       <Avatar name={l.player.nickname} />
                       <span className="flex flex-col">
-                        <span className="text-[15px] font-semibold">{l.player.nickname}</span>
+                        {/* Stretched link: the whole row is clickable, but the table keeps its roles. */}
+                        <Link href={`${base}/${l.player.slug}${q}`} scroll={false} className="text-[15px] font-semibold text-text no-underline after:absolute after:inset-0 hover:text-text">
+                          {l.player.nickname}
+                        </Link>
                         <span className="text-xs text-muted">{roleText(l.role)}</span>
                       </span>
                     </span>
@@ -140,7 +141,7 @@ export function PlayersView({ p, playerSlug, scope }: { p: TeamPage; playerSlug:
                         {c}
                       </span>
                     ))}
-                  </Link>
+                  </div>
                 );
               })}
             </div>
@@ -214,7 +215,7 @@ export function PlayersView({ p, playerSlug, scope }: { p: TeamPage; playerSlug:
                 <div className="flex items-center justify-between border border-dashed border-line-strong bg-inset px-4 py-[14px]">
                   <span className="flex flex-col gap-[2px]">
                     <span className="text-[15px] font-semibold text-muted">[OPPONENT] · [WEEK]</span>
-                    <span className="text-xs text-disabled">— G · — A · — Sv</span>
+                    <span className="text-xs text-muted">— G · — A · — Sv</span>
                   </span>
                   <span className="font-display text-[26px] font-bold text-disabled">— pts</span>
                 </div>
