@@ -60,7 +60,8 @@ export function teamNight(ctx: Ctx, night: Night, teamId: string): TeamNight | n
     const label = roundLabel(round, { w, l }, ruleset.roundStyle, night.stage);
     if (ts.result === "L") l++;
     else w++;
-    rounds.push({ ts, round, label, title: `Round ${round} · ${label}`, recordAfter: { w, l } });
+    const title = label.startsWith("Round ") ? label : `Round ${round} · ${label}`;
+    rounds.push({ ts, round, label, title, recordAfter: { w, l } });
   }
 
   const byRound = (n: number): RoundResult | null => {
@@ -83,7 +84,8 @@ export function teamNight(ctx: Ctx, night: Night, teamId: string): TeamNight | n
   const source: TeamNight["pointsSource"] =
     points === null ? null : preferEngine ? (computed ? "engine" : "sheet") : sheetPoints !== null ? "sheet" : "engine";
   const wins = rounds.filter((r) => r.ts.result !== "L").length;
-  const promoMatch = rounds.find((r) => r.round === 4 && ruleset.roundStyle === "swiss");
+  const promoMatch =
+    night.stage === "league" && ruleset.roundStyle === "swiss" ? rounds.find((r) => r.round === 4) : undefined;
   let path = computed?.path ?? recordText(wins, rounds.length);
   if (!computed && promoMatch) path = `${promoMatch.ts.result === "W" ? "Won" : "Lost"} promotion match`;
 

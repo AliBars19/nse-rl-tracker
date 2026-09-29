@@ -290,7 +290,9 @@ export function patterns(
     const most = meetings.length === maxMeetings ? (topCount === 1 ? ", the most of any opponent" : ", joint most of any opponent") : "";
     out.push(`You met them in ${metNights.size} of ${ourNights.length} league nights${most}.`);
   } else {
-    out.push(`You met them ${word(meetings.length)} times.`);
+    const night = meetings.find((m) => m.night)?.night;
+    const times = meetings.length === 2 ? "twice" : `${word(meetings.length)} times`;
+    out.push(night && metNights.size === 1 ? `You met them ${times} on the same night (${night.label}).` : `You met them ${times}.`);
   }
 
   // 2. Which rounds, and what they were worth

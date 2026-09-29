@@ -139,6 +139,7 @@ describe("Scouting (handoff 5.2 head-to-head)", () => {
       nightSlug: "playoffs",
     });
     const fw = opps.find((o) => o.team.shortName === "Fake Warwick")!;
+    expect(patterns(ctx, season, "div2", fw.team.id, opps)[0]).toBe("You met them twice on the same night (Week 4).");
     expect(theirSeason(ctx, fw.team.id, champs.team.id, "div2", true).line).toBe(
       "Fake Warwick · Division 2 · Promoted to Division 1 in Week 6",
     );
