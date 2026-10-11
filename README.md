@@ -27,7 +27,7 @@ admin area: see **[docs/setup.md](docs/setup.md)**.
 | Path | What |
 |---|---|
 | `src/app/[season]/[team]/…` | Public pages: dashboard, `scouting`, `matches`, `players`, `standings` |
-| `src/app/admin/…` | Admin: sign in, nights, replays, imports, roster, upcoming night |
+| `src/app/admin/…` | Admin: sign in, nights, scrims, replays, imports, roster, upcoming night |
 | `src/app/api/admin/replays/…` | Replay upload → ballchasing, and processing (polling) |
 | `src/lib/engine/` | **Pure logic, fully tested**: points, nights, stats, standings, scenarios, scouting, players |
 | `src/lib/import/` | NSE HTML parser, standings-sheet CSV parser, name matching |

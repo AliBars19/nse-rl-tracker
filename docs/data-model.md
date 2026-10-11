@@ -12,7 +12,7 @@ code, so there are no stored totals to drift out of sync.
 | `teams` | every team we've seen, ours and opponents | `our_key` = `champions` / `commanders` for City; `slug` for URLs; `nse_slug` to match NSE pages |
 | `team_seasons` | which tier's table a City team is tracked in, per season, plus its NSE tournament slug | |
 | `nights` | one **scoring unit** per tier: a weekly night, or Swiss Stage 1 | `week` is the sort order and standings column (Stage 1 = 1) |
-| `series` | one best-of-N, **stored neutrally** (home/away) | `away_team_id` null = bye; `is_forfeit`; `round` 1–3 (1–6 Stage 1, 4 = Swiss promotion match); `playoff_round` for playoffs |
+| `series` | one best-of-N, **stored neutrally** (home/away) | `away_team_id` null = bye; `is_forfeit`; `round` 1–3 (1–6 Stage 1, 4 = Swiss promotion match); `playoff_round` for playoffs; `stage` = `placement` / `league` (with a night) or `playoff` / `scrim` (no night) |
 | `external_night_results` | one cell of the NSE sheet: points and/or a status | status: `played`, `promoted_in`, `relegated_in`, `promoted_out`, `relegated_out`, `absent` |
 | `external_standings` | one row of a sheet tab: NSE's position, total, playoff note | NSE's order breaks ties we can't explain yet |
 | `players`, `roster_entries` | people, and who is on which City team each season | `platform_ids` (`{"steam": "…", "epic": "…"}`) match replays |
@@ -38,6 +38,16 @@ code, so there are no stored totals to drift out of sync.
    left (`promoted_out`); in the Division 1 tab it means they arrived (`promoted_in`).
 6. `teams.slug`, `players.slug` for URLs; `seasons.is_current/is_finished`; `games.home_colour`;
    `upcoming_nights`; `scouting_notes.team_id` (which City team wrote it).
+
+## Scrims
+
+A scrim is a `series` row with `stage = 'scrim'`, no night, no NSE match id, home = the City
+team (Admin → *Scrims*). Its score is optional: without one, the site counts game wins from the
+uploaded replays (a scrim can be drawn). Scrims are left out of `seasonSeries()`, so they never
+touch points, standings, series/game records, form, head-to-head or scouting; their replays
+**do** count in player stats (leaderboard, profiles, dashboard roster). Migration
+`20261011000000_scrims.sql` adds the enum value and replaces the night/stage check with
+"a night exactly when the stage is placement or league".
 
 ## Computed vs imported points
 

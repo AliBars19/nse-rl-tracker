@@ -6,6 +6,7 @@ import type { Dataset, Team, TeamKey, TeamSeason } from "@/lib/domain/types";
 import { ctxOf, ourTeam, seasonSeries, type Ctx, type TeamSeries } from "@/lib/engine/context";
 import { nightsForSeason, type TeamNight } from "@/lib/engine/nights";
 import { TIER_NAMES, type Ruleset } from "@/lib/engine/rulesets";
+import { scrimSeries } from "@/lib/engine/scrims";
 
 export const TEAM_KEYS: TeamKey[] = ["champions", "commanders"];
 
@@ -27,6 +28,8 @@ export interface TeamPage {
   tierName: string;
   season: TeamSeries[];
   nights: TeamNight[];
+  /** Scrims this season, oldest first: player stats only, never points or records. */
+  scrims: TeamSeries[];
   teamOptions: TeamOption[];
   base: string; // '/spring-26/champions'
 }
@@ -60,6 +63,7 @@ export const loadTeamPage = cache(async (seasonSlug: string, teamKey: string): P
     tierName: TIER_NAMES[tier].long,
     season: seasonSeries(ctx, o.team.id, tier),
     nights: nightsForSeason(ctx, o.team.id, tier),
+    scrims: scrimSeries(ctx, o.team.id),
     teamOptions: teamOptions(ds),
     base: `/${ds.season.slug}/${teamKey}`,
   };

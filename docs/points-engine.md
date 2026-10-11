@@ -76,6 +76,11 @@ A City team's season covers its league nights plus its playoff series. Swiss **S
 counts only for a team tracked in Swiss: Champions played Stage 1 before moving to Division 2,
 and that isn't part of their Division 2 season.
 
+**Scrims** (`scrims.ts`) are never part of a season: no points, records, form or scouting.
+Player stats (`playerLines`, `playerProfile`) take the season plus the scrims, so scrim
+replays add to games played and averages, and the profile chart gets a SCRIMS column.
+Replay coverage ("x / y games") stays matchday-only.
+
 ## Scenarios (`scenarios.ts`, `preview.ts`)
 
 Inputs: going-in totals for the table, the Round 1 opponent, the tier's ladder.

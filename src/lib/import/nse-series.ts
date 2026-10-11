@@ -14,7 +14,7 @@ export const isBye = (ref: NseTeamRef) => !ref.slug && /^bye$/i.test(ref.name);
 export interface RowContext {
   seasonId: string;
   tier: Tier;
-  night: { id: string; stage: Exclude<Stage, "playoff"> } | null;
+  night: { id: string; stage: "placement" | "league" } | null;
   teamId: (ref: NseTeamRef) => string;
   seriesId: (nseMatchId: number) => string;
 }

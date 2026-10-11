@@ -128,7 +128,11 @@ function londonOffsetMinutes(utc: Date): number {
 
 /** NSE date + UK kick-off time -> ISO UTC timestamp. */
 export function nseKickoffToIso(date: string, time: string): string {
-  const day = nseDateToIso(date);
+  return londonTimeToIso(nseDateToIso(date), time);
+}
+
+/** 'YYYY-MM-DD' + 'HH:MM' in UK local time -> ISO UTC timestamp (handles BST). */
+export function londonTimeToIso(day: string, time: string): string {
   const [hh, mm] = time.split(":").map(Number);
   const guess = new Date(`${day}T${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:00Z`);
   const offset = londonOffsetMinutes(guess);
