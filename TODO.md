@@ -35,6 +35,7 @@ detail → players.
 - [x] Sheet CSV import (download or paste) with diff preview
 - [x] ballchasing upload (sequential, 429 back-off, 409 = duplicate), polling, stat mapping, player linking
 - [x] Roster management, platform IDs, upcoming night, new season
+- [x] Scrims: admin page, Matches → SCRIMS tab, counted in player stats only (never points)
 - [ ] Try a real replay upload with Ali's `BALLCHASING_TOKEN` (tested against a fake ballchasing server)
 
 ## Phase 5: Ship

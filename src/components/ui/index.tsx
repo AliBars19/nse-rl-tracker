@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-export type Res = "W" | "L" | "BYE";
+/** "D" is a drawn scrim; null is a scrim with no score yet. Both show muted. */
+export type Res = "W" | "L" | "BYE" | "D" | null;
 
 /** Result colour, always paired with a W/L letter in the UI (never colour alone). */
 export const resText = (r: Res) => (r === "W" ? "text-win" : r === "L" ? "text-loss" : "text-muted");

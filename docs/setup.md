@@ -6,7 +6,8 @@ to get the live database and the admin area.
 ## 1. Create the Supabase project
 
 1. supabase.com → New project. Any region near the UK (e.g. `eu-west-2`).
-2. **SQL Editor** → paste `supabase/migrations/20260929000000_init.sql` → Run.
+2. **SQL Editor** → paste each file in `supabase/migrations/` in name order → Run
+   (`…_init.sql`, then the later ones such as `…_scrims.sql`).
    (Or with the Supabase CLI: `supabase link` then `supabase db push`.)
 3. Load Spring 26: run `supabase/seed.sql` the same way. It is ~250 KB; if the editor
    struggles, use psql with the connection string from Project Settings → Database:
@@ -57,6 +58,9 @@ so there is no all-powerful key sitting on the server.
 4. Admin → *Replays* → pick each series → drop the `.replay` files → Upload. Link any
    unmatched names to roster players once; after that they match automatically.
 5. Admin → *Upcoming* → set next week (or Clear when the league ends).
+6. **Scrims** (any day): Admin → *Scrims* → add the date and opponent (score optional), then
+   upload its replays on *Replays* (the scrims are listed under each team). They count for
+   player stats only, never points.
 
 ## Replays
 

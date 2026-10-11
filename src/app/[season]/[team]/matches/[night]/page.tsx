@@ -8,7 +8,7 @@ import { loadTeamPage } from "@/lib/view/team";
 export async function generateMetadata({ params }: PageProps<"/[season]/[team]/matches/[night]">): Promise<Metadata> {
   const { season, team, night } = await params;
   const p = await loadTeamPage(season, team);
-  const label = night === "playoffs" ? "Playoffs" : night.replace("week-", "Week ").replace("stage-1", "Stage 1");
+  const label = night === "playoffs" ? "Playoffs" : night === "scrims" ? "Scrims" : night.replace("week-", "Week ").replace("stage-1", "Stage 1");
   return { title: `${label} · ${p.team.name}` };
 }
 

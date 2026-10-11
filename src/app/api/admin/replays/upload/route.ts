@@ -7,7 +7,7 @@ export const maxDuration = 60;
 
 const Meta = z.object({
   seriesId: z.string().uuid(),
-  gameNumber: z.coerce.number().int().min(1).max(9),
+  gameNumber: z.coerce.number().int().min(1).max(15), // NSE series stop at 9; scrims can run longer
   /** Colour City played as, or 'auto' to detect from roster names. */
   ourColour: z.enum(["auto", "blue", "orange"]),
 });

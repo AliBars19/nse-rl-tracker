@@ -8,8 +8,11 @@
 
 export type Tier = "div1" | "div2" | "swiss";
 
-/** `placement` = Swiss Stage 1, `league` = weekly nights, `playoff` = end-of-season bracket. */
-export type Stage = "placement" | "league" | "playoff";
+/**
+ * `placement` = Swiss Stage 1, `league` = weekly nights, `playoff` = end-of-season bracket,
+ * `scrim` = practice series outside matchdays: counts for player stats, never for points or records.
+ */
+export type Stage = "placement" | "league" | "playoff" | "scrim";
 
 /** The two City teams. Used in URLs: /spring-26/champions, /spring-26/commanders. */
 export type TeamKey = "champions" | "commanders";
@@ -51,7 +54,7 @@ export interface Night {
   id: string;
   seasonId: string;
   tier: Tier;
-  stage: Exclude<Stage, "playoff">;
+  stage: "placement" | "league";
   /** Sort order and the week number shown in the standings. Stage 1 uses 1. */
   week: number;
   label: string; // 'Week 3' | 'Stage 1'

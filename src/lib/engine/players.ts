@@ -116,21 +116,37 @@ export interface PlayerProfile {
   best: { opponent: string; night: string; goals: number; assists: number; saves: number; score: number } | null;
 }
 
-export function playerProfile(ctx: Ctx, playerId: string, season: TeamSeries[], nights: TeamNight[]): PlayerProfile {
-  const games = processedGames(ctx, new Set(season.map((s) => s.series.id)));
+/**
+ * Profile extras. `scrims` add a trailing SCRIMS column to the score-by-night chart and can supply
+ * the best game; they never affect anything team-level.
+ */
+export function playerProfile(
+  ctx: Ctx,
+  playerId: string,
+  season: TeamSeries[],
+  nights: TeamNight[],
+  scrims: TeamSeries[] = [],
+): PlayerProfile {
+  const all = [...season, ...scrims];
+  const games = processedGames(ctx, new Set(all.map((s) => s.series.id)));
   const stats = ctx.ds.playerGameStats.filter((s) => s.playerId === playerId);
   const gameById = new Map(games.map((g) => [g.id, g]));
-  const seriesById = new Map(season.map((s) => [s.series.id, s]));
+  const seriesById = new Map(all.map((s) => [s.series.id, s]));
 
-  const avgByNight = nights.map((n) => {
-    const ids = new Set(n.rounds.map((r) => r.ts.series.id));
+  const avgFor = (seriesIds: Set<string>) => {
     const mine = stats.filter((s) => {
       const g = gameById.get(s.gameId);
-      return g && ids.has(g.seriesId);
+      return g && seriesIds.has(g.seriesId);
     });
-    const avg = mine.length ? mine.reduce((t, s) => t + (s.score ?? 0), 0) / mine.length : null;
-    return { label: n.night.stage === "placement" ? "STG 1" : `WK ${n.night.week}`, avg };
-  });
+    return mine.length ? mine.reduce((t, s) => t + (s.score ?? 0), 0) / mine.length : null;
+  };
+
+  const avgByNight = nights.map((n) => ({
+    label: n.night.stage === "placement" ? "STG 1" : `WK ${n.night.week}`,
+    avg: avgFor(new Set(n.rounds.map((r) => r.ts.series.id))),
+  }));
+  const scrimAvg = avgFor(new Set(scrims.map((s) => s.series.id)));
+  if (scrimAvg !== null) avgByNight.push({ label: "SCRIMS", avg: scrimAvg });
 
   let best: PlayerProfile["best"] = null;
   for (const s of stats) {
@@ -140,7 +156,7 @@ export function playerProfile(ctx: Ctx, playerId: string, season: TeamSeries[], 
     const ts = seriesById.get(g.seriesId);
     best = {
       opponent: ts?.opponent?.shortName ?? "—",
-      night: ts?.night?.label ?? "Playoffs",
+      night: ts?.series.stage === "scrim" ? "Scrim" : (ts?.night?.label ?? "Playoffs"),
       goals: s.goals ?? 0,
       assists: s.assists ?? 0,
       saves: s.saves ?? 0,

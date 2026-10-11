@@ -6,9 +6,14 @@ import { SeriesPicker } from "@/components/admin/SeriesPicker";
 import { adminDataset } from "@/lib/data/admin";
 import { ctxOf, ourTeam, seasonSeries } from "@/lib/engine/context";
 import { nightsForSeason } from "@/lib/engine/nights";
+import { scrimScore, scrimSeries } from "@/lib/engine/scrims";
 import { PLAYOFF_ROUND_NAMES } from "@/lib/engine/stats";
 import { ballchasingToken } from "@/lib/env";
+import { dayDate } from "@/lib/view/dashboard";
 import { TEAM_KEYS } from "@/lib/view/team";
+
+/** Replay slots offered for a scrim: they have no fixed length. */
+const SCRIM_MAX_GAMES = 15;
 
 export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/replays">) {
   const { series: seriesParam } = await searchParams;
@@ -31,14 +36,30 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
       })
       .reverse();
     groups.push({ label: o.team.name, options });
+    const scrims = scrimSeries(ctx, o.team.id)
+      .filter((s) => s.opponent)
+      .map((s) => {
+        const done = ds.games.filter((g) => g.seriesId === s.series.id && g.processedAt).length;
+        const score = scrimScore(ctx, s);
+        const when = s.series.playedAt ? dayDate(s.series.playedAt) : "date TBC";
+        return {
+          id: s.series.id,
+          label: `Scrim · ${when} · vs ${s.opponent!.shortName}${score?.source === "entered" ? ` ${score.our}–${score.opp}` : ""} · ${done} ${done === 1 ? "replay" : "replays"}`,
+        };
+      })
+      .reverse();
+    if (scrims.length) groups.push({ label: `${o.team.name} · scrims (player stats only)`, options: scrims });
   }
 
   const selected = typeof seriesParam === "string" ? ds.series.find((s) => s.id === seriesParam) : undefined;
   let body = <Notice>Pick a series to upload its replays.</Notice>;
   if (selected) {
     const ourId = ds.teams.find((t) => t.ourKey && (t.id === selected.homeTeamId || t.id === selected.awayTeamId))?.id;
-    const played = (selected.homeScore ?? 0) + (selected.awayScore ?? 0);
+    const isScrim = selected.stage === "scrim";
     const games = ds.games.filter((g) => g.seriesId === selected.id).sort((a, b) => a.gameNumber - b.gameNumber);
+    const entered = (selected.homeScore ?? 0) + (selected.awayScore ?? 0);
+    // A scrim shows its entered games plus any extra uploaded ones; it may have no score at all.
+    const played = isScrim ? Math.max(entered, games.at(-1)?.gameNumber ?? 0) : entered;
     const { data: statusRows } = await db.from("games").select("id, ballchasing_status").eq("series_id", selected.id);
     const statusOf = new Map((statusRows ?? []).map((r) => [r.id as string, r.ballchasing_status as string | null]));
 
@@ -63,6 +84,9 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
 
     body = (
       <>
+        {isScrim && (
+          <Notice>Scrim: its replays count towards player stats only, never points or records.</Notice>
+        )}
         <ul className="grid grid-cols-2 gap-3 md:grid-cols-5">
           {Array.from({ length: played }, (_, i) => {
             const g = games.find((x) => x.gameNumber === i + 1);
@@ -78,7 +102,7 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
             );
           })}
         </ul>
-        <ReplayUploader seriesId={selected.id} gamesPlayed={played} taken={games.filter((g) => g.processedAt).map((g) => g.gameNumber)} />
+        <ReplayUploader seriesId={selected.id} gamesPlayed={isScrim ? SCRIM_MAX_GAMES : played} taken={games.filter((g) => g.processedAt).map((g) => g.gameNumber)} />
       </>
     );
     return (

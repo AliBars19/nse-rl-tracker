@@ -18,6 +18,7 @@ export function MatchesView({ p, v, tabs, current, isAdmin }: { p: TeamPage; v: 
   const base = `${p.base}/matches`;
   const sel = v.selected;
   const perRow = Math.min(v.cards.length, 3);
+  const path = v.kind !== "scrims";
 
   return (
     <Main>
@@ -72,16 +73,16 @@ export function MatchesView({ p, v, tabs, current, isAdmin }: { p: TeamPage; v: 
                 <span className="text-[17px] font-semibold">{c.opp}</span>
                 <span className="flex items-baseline gap-[10px]">
                   <span className={`font-display text-4xl font-bold leading-none ${resText(c.res)}`}>{c.score}</span>
-                  {c.res !== "BYE" && (
+                  {c.resLabel && (
                     <span className={`font-display text-[15px] font-bold ${resText(c.res)}`}>
-                      {c.res === "W" ? "WIN" : "LOSS"}
+                      {c.resLabel}
                       {c.ts.series.isForfeit ? " · FF" : ""}
                     </span>
                   )}
                 </span>
                 {c.after && <span className="text-[13px] text-text-3">{c.after}</span>}
               </Link>
-              {i < v.cards.length - 1 ? <Chevron /> : <div className="hidden w-7 md:block" aria-hidden />}
+              {path && i < v.cards.length - 1 ? <Chevron /> : <div className="hidden w-7 md:block" aria-hidden />}
             </div>
           ))}
           <div
@@ -102,12 +103,14 @@ export function MatchesView({ p, v, tabs, current, isAdmin }: { p: TeamPage; v: 
               <span className="text-xs tracking-[0.14em] text-muted">{sel.heading}</span>
               <h2 id="series-title" className="m-0 font-display text-2xl font-bold uppercase md:text-[30px]">
                 {p.team.name}{" "}
-                {sel.ts.opponent ? (
+                {sel.ts.opponent && sel.score ? (
                   <>
-                    <span className={sel.ts.result === "W" ? "text-win" : "text-loss"}>{sel.ts.our}</span>{" "}
+                    <span className={resText(sel.score.res)}>{sel.score.our}</span>{" "}
                     <span className="text-disabled">–</span>{" "}
-                    <span className={sel.ts.result === "W" ? "text-loss" : "text-win"}>{sel.ts.opp}</span> {sel.ts.opponent.shortName}
+                    <span className={resText(sel.score.res === "W" ? "L" : sel.score.res === "L" ? "W" : "D")}>{sel.score.opp}</span> {sel.ts.opponent.shortName}
                   </>
+                ) : sel.ts.opponent ? (
+                  <span className="text-muted">vs {sel.ts.opponent.shortName}</span>
                 ) : (
                   <span className="text-muted">· bye</span>
                 )}
@@ -150,11 +153,7 @@ export function MatchesView({ p, v, tabs, current, isAdmin }: { p: TeamPage; v: 
             </div>
           ) : (
             <div className="border-b border-line px-4 py-5 md:px-7">
-              <Placeholder>
-                {sel.ts.series.isForfeit
-                  ? "Forfeit: no games were played, so this series is left out of game stats."
-                  : "Bye: no match was played."}
-              </Placeholder>
+              <Placeholder>{sel.empty}</Placeholder>
             </div>
           )}
 

@@ -101,11 +101,13 @@ export function ourTeam(ds: Dataset, key: TeamKey): { team: Team; teamSeason: Te
  * The series that make up a City team's season on this site: every league night it played,
  * Stage 1 only if Stage 1 belongs to the tier it is tracked in, plus its playoff series.
  * (Champions also played Swiss Stage 1 before Division 2; that is not part of their Div 2 season.)
+ * Scrims are never part of it: see scrimSeries() in ./scrims.
  */
 export function seasonSeries(ctx: Ctx, teamId: string, trackedTier: Tier): TeamSeries[] {
   return (ctx.seriesByTeam.get(teamId) ?? [])
     .filter((s) => {
       if (s.seasonId !== ctx.ds.season.id) return false;
+      if (s.stage === "scrim") return false;
       if (s.stage === "playoff") return s.tier === trackedTier;
       if (s.stage === "placement") return s.tier === trackedTier;
       return true;

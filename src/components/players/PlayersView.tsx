@@ -25,11 +25,14 @@ const COLS = ["GP", "SCORE", "G", "A", "SV", "SH%", "MVP"];
 const COL_TITLES = ["Games played", "Score", "Goals", "Assists", "Saves", "Shooting percentage", "MVPs"];
 
 export function PlayersView({ p, playerSlug, scope }: { p: TeamPage; playerSlug: string | null; scope: Scope }) {
-  const lines = playerLines(p.ctx, p.team.id, p.season);
+  // Scrims count towards player stats (never points), so they join the matchday series here.
+  const lines = playerLines(p.ctx, p.team.id, [...p.season, ...p.scrims]);
   const lead = leaders(lines);
   const cov = replayCoverage(p.ctx, p.season);
+  const scrimIds = new Set(p.scrims.map((s) => s.series.id));
+  const scrimGames = p.ds.games.filter((g) => scrimIds.has(g.seriesId) && g.processedAt).length;
   const selected = lines.find((l) => l.player.slug === playerSlug) ?? lines[0];
-  const profile = selected ? playerProfile(p.ctx, selected.player.id, p.season, p.nights) : null;
+  const profile = selected ? playerProfile(p.ctx, selected.player.id, p.season, p.nights, p.scrims) : null;
   const base = `${p.base}/players`;
   const q = scope === "totals" ? "?scope=totals" : "";
   const roleText = (r: string) => (r === "leader" ? "Team leader" : r === "sub" ? "Sub" : "Player");
@@ -50,8 +53,11 @@ export function PlayersView({ p, playerSlug, scope }: { p: TeamPage; playerSlug:
     <Main>
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <TeamSwitcher options={p.teamOptions} current={p.key} />
-        <Placeholder right={`${cov.processed} / ${cov.total} games`} className="py-[10px]">
-          Stats fill in from uploaded replays
+        <Placeholder
+          right={`${cov.processed} / ${cov.total} games${scrimGames ? ` + ${scrimGames} scrim` : ""}`}
+          className="py-[10px]"
+        >
+          Stats fill in from uploaded replays{p.scrims.length ? ", scrims included" : ""}
         </Placeholder>
       </div>
 

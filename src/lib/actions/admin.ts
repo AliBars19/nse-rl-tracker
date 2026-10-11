@@ -6,7 +6,7 @@ import { z } from "zod";
 import { adminDataset, ourTeamOrThrow, uniqueSlug } from "@/lib/data/admin";
 import type { Dataset, Tier } from "@/lib/domain/types";
 import { defaultShortName, nameKey } from "@/lib/import/names";
-import { nseDateToIso, parseNseMatchTable, type NseTeamRef } from "@/lib/import/nse";
+import { londonTimeToIso, nseDateToIso, parseNseMatchTable, type NseTeamRef } from "@/lib/import/nse";
 import { rowToSeries } from "@/lib/import/nse-series";
 import { parseStandingsSheet, sheetCsvUrl, SPRING_26_LAYOUTS } from "@/lib/import/sheet";
 
@@ -124,6 +124,94 @@ async function findOrCreateTeam(db: Awaited<ReturnType<typeof adminDataset>>["db
     .single();
   if (error) throw error;
   return data.id;
+}
+
+// ------------------------------------------------------------------ scrims
+
+/** Most games one scrim can hold (also the replay uploader's limit for scrims). */
+const SCRIM_MAX_GAMES = 15;
+
+const ScrimZ = z
+  .object({
+    id: z.string().uuid().nullable(),
+    teamKey: TeamKeyZ,
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick the date"),
+    time: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+    opponentId: z.string().uuid().nullable(),
+    newOpponent: z.string().trim().max(80).nullable(),
+    our: z.number().int().min(0).max(SCRIM_MAX_GAMES).nullable(),
+    opp: z.number().int().min(0).max(SCRIM_MAX_GAMES).nullable(),
+  })
+  .superRefine((r, ctx) => {
+    if (!r.opponentId && !r.newOpponent) ctx.addIssue({ code: "custom", message: "Pick or type the opponent" });
+    if ((r.our === null) !== (r.opp === null)) ctx.addIssue({ code: "custom", message: "Enter both scores, or leave both empty" });
+  });
+
+export type ScrimInput = z.infer<typeof ScrimZ>;
+
+/**
+ * Add or edit a scrim. Scrims have no league night and never count for points or records;
+ * their replays count towards player stats. With no score entered, the site counts game wins
+ * from the uploaded replays.
+ */
+export async function saveScrim(input: ScrimInput): Promise<ActionResult> {
+  try {
+    const data = ScrimZ.parse(input);
+    const { db, ds } = await adminDataset();
+    if (!ds) throw new Error("No current season. Create one on the admin overview first.");
+    const { team, teamSeason } = ourTeamOrThrow(ds, data.teamKey);
+    const opponentId = data.opponentId ?? (await findOrCreateTeam(db, ds, data.newOpponent!));
+    if (opponentId === team.id) throw new Error("A team cannot scrim itself");
+    const high = Math.max(data.our ?? 0, data.opp ?? 0);
+    // Keep an existing scrim's home/away sides (uploaded games store goals by side): only an
+    // internal scrim between our own teams, edited from the away team, has us away.
+    const weAreAway = !!data.id && ds.series.find((s) => s.id === data.id)?.awayTeamId === team.id;
+    const sides = weAreAway
+      ? { home_team_id: opponentId, away_team_id: team.id, home_score: data.opp, away_score: data.our }
+      : { home_team_id: team.id, away_team_id: opponentId, home_score: data.our, away_score: data.opp };
+    const row = {
+      season_id: ds.season.id,
+      tier: teamSeason.tier,
+      stage: "scrim",
+      night_id: null,
+      round: null,
+      playoff_round: null,
+      ...sides,
+      best_of: Math.min(9, Math.max(5, high * 2 - 1)),
+      is_forfeit: false,
+      played_at: londonTimeToIso(data.date, data.time ?? "19:00"),
+    };
+    if (data.id) {
+      const { error } = await db.from("series").update(row).eq("id", data.id).eq("stage", "scrim");
+      if (error) throw error;
+    } else {
+      const { error } = await db.from("series").insert(row);
+      if (error) {
+        if (/invalid input value for enum stage/i.test(error.message)) {
+          throw new Error("The database needs the scrims migration first: run supabase/migrations/20261011000000_scrims.sql.");
+        }
+        throw error;
+      }
+    }
+    refreshSite();
+    return { ok: true, message: data.id ? "Scrim updated." : `Scrim added for ${team.shortName}. Upload its replays on the Replays page.` };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** Delete a scrim and (by cascade) its uploaded games and stats. */
+export async function deleteScrim(id: string): Promise<ActionResult> {
+  try {
+    const scrimId = z.string().uuid().parse(id);
+    const { db } = await adminDataset();
+    const { error } = await db.from("series").delete().eq("id", scrimId).eq("stage", "scrim");
+    if (error) throw error;
+    refreshSite();
+    return { ok: true, message: "Scrim deleted, with its replay stats." };
+  } catch (e) {
+    return fail(e);
+  }
 }
 
 // ------------------------------------------------------------------ upcoming night (Scenarios)

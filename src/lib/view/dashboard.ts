@@ -162,7 +162,7 @@ export function buildDashboard(p: TeamPage): DashboardView {
     };
   }
 
-  const lines = playerLines(ctx, team.id, season);
+  const lines = playerLines(ctx, team.id, [...season, ...p.scrims]);
   const roster = lines.map((l) => ({
     name: l.player.nickname,
     slug: l.player.slug,
