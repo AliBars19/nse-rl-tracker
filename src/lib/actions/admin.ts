@@ -6,7 +6,7 @@ import { z } from "zod";
 import { adminDataset, ourTeamOrThrow, uniqueSlug } from "@/lib/data/admin";
 import type { Dataset, Tier } from "@/lib/domain/types";
 import { defaultShortName, nameKey } from "@/lib/import/names";
-import { londonTimeToIso, nseDateToIso, parseNseMatchTable, type NseTeamRef } from "@/lib/import/nse";
+import { londonTimeToIso, nseDateToIso, parseNseMatchTable, tournamentSlugFrom, type NseTeamRef } from "@/lib/import/nse";
 import { rowToSeries } from "@/lib/import/nse-series";
 import { parseStandingsSheet, sheetCsvUrl, SPRING_26_LAYOUTS } from "@/lib/import/sheet";
 import { buildSorterTeams, type SorterTeam } from "@/lib/view/sorter";
@@ -677,10 +677,13 @@ export async function syncNseForDates(input: z.infer<typeof SyncZ>): Promise<Act
     if (!ds) throw new Error("No current season. Create one on the admin overview first.");
     const wanted = new Set(dates);
     const targets = new Map<string, { tier: Tier; tournament: string }>();
-    for (const key of ["champions", "commanders"] as const) {
-      const o = ourTeamOrThrow(ds, key);
-      if (!o.teamSeason.nseTournamentSlug) throw new Error(`${o.team.name} has no NSE tournament set for ${ds.season.name}. Add it on the admin overview.`);
-      targets.set(`${o.teamSeason.nseTournamentSlug}|${o.teamSeason.tier}`, { tier: o.teamSeason.tier, tournament: o.teamSeason.nseTournamentSlug });
+    const ours = (["champions", "commanders"] as const).map((key) => ourTeamOrThrow(ds, key));
+    for (const o of ours) {
+      // A team with no slug of its own can share the other team's when both are in the same tier.
+      const sibling = ours.find((x) => x !== o && x.teamSeason.tier === o.teamSeason.tier && x.teamSeason.nseTournamentSlug);
+      const tournament = o.teamSeason.nseTournamentSlug ?? sibling?.teamSeason.nseTournamentSlug;
+      if (!tournament) throw new Error(`${o.team.name} has no NSE tournament set for ${ds.season.name}. Set it under Admin → Overview → NSE tournaments.`);
+      targets.set(`${tournament}|${o.teamSeason.tier}`, { tier: o.teamSeason.tier, tournament });
     }
     const done: string[] = [];
     for (const { tier, tournament } of targets.values()) {
@@ -710,6 +713,33 @@ export async function syncNseForDates(input: z.infer<typeof SyncZ>): Promise<Act
       message: done.length ? `Imported ${done.join(", ")} from NSE.` : "NSE has no results for those days yet.",
       data: teams,
     };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+// ------------------------------------------------------------------ NSE tournament per team
+
+const TournamentsZ = z.object({ champions: z.string().max(300), commanders: z.string().max(300) });
+
+/** Set (or fix) which NSE tournament each City team plays in this season. Accepts a slug or a pasted URL. */
+export async function setTournaments(input: z.infer<typeof TournamentsZ>): Promise<ActionResult> {
+  try {
+    const data = TournamentsZ.parse(input);
+    const { db, ds } = await adminDataset();
+    if (!ds) throw new Error("No current season");
+    const saved: string[] = [];
+    for (const key of ["champions", "commanders"] as const) {
+      const o = ourTeamOrThrow(ds, key);
+      const raw = data[key].trim();
+      const slug = raw ? tournamentSlugFrom(raw) : null;
+      if (raw && !slug) throw new Error(`${o.team.name}: “${raw}” is not a tournament slug or an NSE tournament URL.`);
+      const { error } = await db.from("team_seasons").update({ nse_tournament_slug: slug }).eq("season_id", ds.season.id).eq("team_id", o.team.id);
+      if (error) throw error;
+      saved.push(`${o.team.name}: ${slug ?? "not set"}`);
+    }
+    refreshSite();
+    return { ok: true, message: `Saved. ${saved.join(" · ")}` };
   } catch (e) {
     return fail(e);
   }

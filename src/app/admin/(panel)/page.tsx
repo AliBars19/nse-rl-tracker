@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminCard, Notice } from "@/components/admin/ui";
 import { NewSeasonForm, SeasonsList } from "@/components/admin/SeasonForm";
+import { TournamentForm } from "@/components/admin/TournamentForm";
 import { adminDataset } from "@/lib/data/admin";
 import { ctxOf, seasonSeries } from "@/lib/engine/context";
 import { nightsForSeason } from "@/lib/engine/nights";
@@ -62,6 +63,17 @@ export default async function AdminHome() {
           );
         })}
       </div>
+
+      <AdminCard title="NSE tournaments" id="tournaments">
+        <p className="m-0 text-sm text-text-3">
+          Which NSE tournament each team plays in for {ds.season.name}. Imports and the replay sorter use this to find the results.
+          {TEAM_KEYS.some((k) => !ourTeam(ds, k)?.teamSeason.nseTournamentSlug) && " One is missing: fill it in."}
+        </p>
+        <TournamentForm
+          champions={ourTeam(ds, "champions")?.teamSeason.nseTournamentSlug ?? ""}
+          commanders={ourTeam(ds, "commanders")?.teamSeason.nseTournamentSlug ?? ""}
+        />
+      </AdminCard>
 
       <AdminCard title="Seasons" id="seasons">
         <SeasonsList seasons={seasons.map((x) => ({ id: x.id, name: x.name, isCurrent: x.isCurrent, isFinished: x.isFinished }))} />

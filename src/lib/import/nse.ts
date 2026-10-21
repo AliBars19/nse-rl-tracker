@@ -102,6 +102,17 @@ const MONTHS: Record<string, number> = {
   Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12,
 };
 
+/**
+ * The tournament slug from what Ali pastes: a bare slug or any NSE tournament URL
+ * ('https://nse.gg/tournaments/rocket-league-nse-winter-26/stage-1'). Null if it is neither.
+ */
+export function tournamentSlugFrom(input: string): string | null {
+  const text = input.trim();
+  const fromUrl = /\/tournaments\/([a-z0-9-]+)/i.exec(text);
+  if (fromUrl) return fromUrl[1].toLowerCase();
+  return /^[a-z0-9-]+$/i.test(text) ? text.toLowerCase() : null;
+}
+
 /** '17 Feb 26' -> '2026-02-17' */
 export function nseDateToIso(date: string): string {
   const m = date.match(/^(\d{1,2}) (\w{3}) (\d{2})$/);
