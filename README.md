@@ -9,6 +9,56 @@ Rocket League teams in the NSE (National Student Esports) weekly tournament:
 Public to read; one admin (Ali) enters results and uploads replays. Built with Next.js 16
 (App Router), Supabase (Postgres + Auth + RLS) and the ballchasing.com API, hosted on Vercel.
 
+## Start here: current state (Winter 26, as of 21 Oct 2026)
+
+Read this first. It answers the questions that otherwise get re-asked every session.
+
+**Live site:** https://nse-rl-tracker.vercel.app (Vercel; every merge to `main` deploys).
+Winter 26 is **already created and current** (`/winter-26/champions`, `/winter-26/commanders`),
+with both rosters and two scrims entered (6 and 13 Oct). Both teams show "No results yet",
+because Week 1 has not been imported. Don't re-create the season.
+
+**Where replays go:** upload them on **our own site**: *Admin → Replays* (sign in at `/admin`),
+pick the series or scrim, drop the `.replay` files. Our server forwards each file to
+ballchasing.com, polls until it is parsed, and stores the stats. Nobody uploads to ballchasing by hand.
+Rocket League replays (`.replay`) only exist on PC. The `BALLCHASING_TOKEN` is a Vercel
+environment variable (server only): if it is missing, the Admin overview and Replays page
+show a red "BALLCHASING_TOKEN is not set" banner. Claude sessions cannot list Vercel env vars.
+
+**Where results come from:**
+- NSE: https://nse.gg/tournaments/rocket-league-nse-winter-26 (`tournaments.nse.gg` serves the same
+  pages; the importer uses that host). Pages: `/stage-1`, `/matches`, `/teams`, `/schedule`,
+  later `/week-3` … `/week-6`. `parseNseMatchTable` in `src/lib/import/nse.ts` already parses
+  the Winter 26 pages. Import with *Admin → Imports → NSE matches* (page `stage-1`, then `week-N`).
+- Standings sheet ("Week 1 Rocket Standings"): https://docs.google.com/spreadsheets/d/1TQ7WzJ4a8Ku4Jl3hmpx9Kq5WERE3aV1euabSNfyo3To
+  Tabs: **Starting groups** (Groups 1–3, by seed) and **After week 1** (Groups 1–6). It has **no
+  scores or points**, only group membership. Its layout differs from the Spring 26 sheet, so
+  check `src/lib/import/sheet.ts` before using the *Standings sheet* import on it.
+
+**Winter 26 format (from NSE):** Tuesdays 7pm. Weeks 1–2 qualification ("Stage 1", 3 rounds per
+night, 20 and 27 Oct), weeks 3–6 league (3, 10, 17, 24 Nov), week 7–8 playoffs (1 Dec, finals
+5/6 Dec). Stage 2 splits teams into divisions; 2 are relegated and 2 promoted each week.
+155 teams signed up. Seeds: City Champions 9, City Commanders 44.
+
+**Qualification groups (inferred, not stated by NSE):** the sheet's groups look like win
+counts after Week 1. "Need N more wins for Div 1" fits 4 wins over the 6 qualification
+rounds for Div 1, and fewer goes to Swiss (Group 4–6 = 2 / 1 / 0 wins in Swiss).
+Treat as unconfirmed until NSE or Ali says so.
+
+**Week 1 (20 Oct) results:**
+
+| Team | Round 1 | Round 2 | Round 3 | Group after |
+|---|---|---|---|---|
+| City Champions | W 3–1 NSCG Ghosts | W 3–1 Solent Cardinals | L 0–3 Durham Defenders RL | 2 (needs 2 more wins) |
+| City Commanders | L 1–3 UWE Sea Stags RL | L 0–3 No Execuses | W 3–1 Leic Is More | 3 (needs 3 more wins) |
+
+**What is not built yet** (see TODO.md): a Winter 26 ruleset in `src/lib/engine/rulesets.ts`
+(Stage 1 is a wins-based qualification, not the Spring points ladder), a "wins needed for
+Div 1" view for the Stage 1 dashboard, and the real-replay upload test.
+
+**Working rules for Claude sessions:** check the live site and `main` before proposing work.
+Don't ask Ali for things already in this README, docs/ or the repo.
+
 ## Quick start
 
 ```bash

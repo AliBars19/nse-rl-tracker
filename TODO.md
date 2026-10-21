@@ -44,6 +44,14 @@ detail → players.
 - [x] Deploy to Vercel production: https://nse-rl-tracker.vercel.app (every merge to `main` deploys)
 - [x] README, docs/setup.md, docs/points-engine.md, docs/data-model.md
 
+## Winter 26 (added 21 Oct 2026)
+- [x] Season created on the live site; rosters and two scrims entered
+- [ ] Import Week 1 / Stage 1 from NSE (Admin → Imports → NSE matches, page `stage-1`)
+- [ ] Winter 26 ruleset: Stage 1 is wins-based qualification (inferred: 4 wins of 6 rounds for Div 1), not the Spring points ladder. Confirm with NSE
+- [ ] Stage 1 dashboard: "wins needed for Div 1" and the sheet's groups (sheet has groups only, no scores)
+- [ ] Check `src/lib/import/sheet.ts` against the new "Week 1 Rocket Standings" layout before using the sheet import
+- [ ] First real replay upload through Admin → Replays (confirm `BALLCHASING_TOKEN` banner is absent)
+
 ## Open questions for Ali
 
 Answered from NSE data during the build (please confirm):
