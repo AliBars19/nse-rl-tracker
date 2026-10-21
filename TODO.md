@@ -50,7 +50,8 @@ detail → players.
 - [ ] Winter 26 ruleset: Stage 1 is wins-based qualification (inferred: 4 wins of 6 rounds for Div 1), not the Spring points ladder. Confirm with NSE
 - [ ] Stage 1 dashboard: "wins needed for Div 1" and the sheet's groups (sheet has groups only, no scores)
 - [ ] Check `src/lib/import/sheet.ts` against the new "Week 1 Rocket Standings" layout before using the sheet import
-- [ ] First real replay upload through Admin → Replays (confirm `BALLCHASING_TOKEN` banner is absent)
+- [x] Replay auto-sort: drop a whole night of replays, files are placed on series/games from their own headers (tested on 11 real Week 1 replays)
+- [ ] First real replay upload through Admin → Replays → Sort and upload a night (token is set in Vercel Production; replays are in Ali's Linux `Demos` folder)
 
 ## Open questions for Ali
 

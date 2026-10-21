@@ -23,3 +23,19 @@ Things that went wrong once and how they were fixed, so nobody has to rediscover
 - `/` is a season picker; switching season or team keeps the current page.
 - Scrims count towards player stats only, never points, records, form or scouting.
 - No service-role key in the app or in Vercel; the Supabase secret key should be rotated (it was pasted into a chat once).
+
+## Replay files (found reading real Winter 26 replays, 21 Oct 2026)
+
+- **File names are hashes and file dates are unreliable** (zipping or copying resets them). Everything needed is in the
+  replay header: `MatchStartEpoch` (start time, UTC), `Team0Score`/`Team1Score` (**omitted when 0**), `PlayerStats`, `MapName`.
+  Sorting reads that (`src/lib/replay/header.ts`), never file dates.
+- **The person hosting a private lobby is listed as a player with `Team = -1`** (here Caprillix, all zeros). Drop them; they are not on either team.
+- **`ReplayName` is the lobby name**: NSE lobbies are `NSEMD<match day>G<round>` (e.g. `NSEMD1G2` = match day 1, round 2). Used only as a
+  tie-breaker, because both City teams' lobbies carry the same name.
+- **In-game names do not match roster nicknames** (`stav1c` vs "Stavic", `yam.een` vs "Yameen"), so City's side is found by roster names
+  if any match, otherwise by who keeps appearing across the night's replays (opponents change each series). A single replay with no roster match
+  cannot be placed: set its colour by hand.
+- **Header quirk:** byte properties are either an enum name + enum value, or `None` + one raw byte (PlayStation IDs use the latter).
+- Both City teams play at the same time, so a night's replays are assigned to whichever team's series scores they add up to
+  (e.g. Champions 3–1, 3–1, 0–3 vs Commanders 1–3, 0–3, 3–1 are different win/loss tallies over the same 11 games).
+

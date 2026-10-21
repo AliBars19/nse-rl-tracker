@@ -18,12 +18,17 @@ Winter 26 is **already created and current** (`/winter-26/champions`, `/winter-2
 with both rosters and two scrims entered (6 and 13 Oct). Both teams show "No results yet",
 because Week 1 has not been imported. Don't re-create the season.
 
-**Where replays go:** upload them on **our own site**: *Admin → Replays* (sign in at `/admin`),
-pick the series or scrim, drop the `.replay` files. Our server forwards each file to
-ballchasing.com, polls until it is parsed, and stores the stats. Nobody uploads to ballchasing by hand.
-Rocket League replays (`.replay`) only exist on PC. The `BALLCHASING_TOKEN` is a Vercel
-environment variable (server only): if it is missing, the Admin overview and Replays page
-show a red "BALLCHASING_TOKEN is not set" banner. Claude sessions cannot list Vercel env vars.
+**Where replays go:** upload them on **our own site**, not on ballchasing: sign in at `/admin` →
+*Replays* → **Sort and upload a night**. Drop every `.replay` file from the night (any names, any order,
+both teams). The page reads each file's header in the browser (start time, score, players, lobby name
+like `NSEMD1G2`), works out which team they are, puts them on the right NSE series and game numbers
+by matching wins/losses to the series scores, and shows a table to check. **Upload** then sends them
+one at a time through our server to ballchasing and saves the stats. It needs the night's results
+imported first (*Imports → NSE matches*). *Upload to one series* below it is the manual fallback.
+Rocket League replays (`.replay`) only exist on PC (on Linux: the `Demos` folder inside the Wine/Proton prefix).
+The `BALLCHASING_TOKEN` is a Vercel environment variable (server only, added 29 Sep): if it is missing, the
+Replays and Admin pages show a red banner. Claude sessions cannot read Vercel env vars or sign in as admin,
+so Claude cannot upload replays for Ali; it can only read them locally (`src/lib/replay/header.ts`).
 
 **Where results come from:**
 - NSE: https://nse.gg/tournaments/rocket-league-nse-winter-26 (`tournaments.nse.gg` serves the same
@@ -82,6 +87,7 @@ admin area: see **[docs/setup.md](docs/setup.md)**.
 | `src/lib/engine/` | **Pure logic, fully tested**: points, nights, stats, standings, scenarios, scouting, players |
 | `src/lib/import/` | NSE HTML parser, standings-sheet CSV parser, name matching |
 | `src/lib/ballchasing/` | ballchasing client and replay → stats mapping |
+| `src/lib/replay/` | **Replay sorting, pure and tested**: `header.ts` reads a replay's header, `sort.ts` puts files on series + game numbers, `upload-client.ts` is the browser upload/poll loop |
 | `src/lib/data/` | Loads a season as one `Dataset` from Supabase, or from the bundled seed |
 | `src/lib/view/` | Turns engine output into page view-models |
 | `src/components/` | UI (design tokens live in `src/app/globals.css`) |
