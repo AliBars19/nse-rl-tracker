@@ -46,6 +46,7 @@ admin area: see **[docs/setup.md](docs/setup.md)**.
 - [docs/points-engine.md](docs/points-engine.md): how nights are scored, derived stats, scenarios, known anomalies
 - [docs/data-model.md](docs/data-model.md): tables, why they look like this, RLS
 - [TODO.md](TODO.md): build checklist and **open questions for Ali**
+- [docs/lessons.md](docs/lessons.md): gotchas already hit (fonts, Tailwind layers, seasons, migrations, replays) and decisions made with Ali
 - [docs/HANDOFF.md](docs/HANDOFF.md): the original planning handoff
 
 ## Scripts
