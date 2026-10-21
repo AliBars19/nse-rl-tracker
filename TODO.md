@@ -54,6 +54,9 @@ detail → players.
 - [ ] Try "Fetch results from NSE" on the live site (the database write path could only be tested against NSE, not the admin session)
 - [ ] First real replay upload through Admin → Replays → Sort and upload a night (token is set in Vercel Production; replays are in Ali's Linux `Demos` folder)
 
+- [x] Per-game scoreboards + "Watch in 3D" links on Matches; "Their players vs City" on Scouting; boost/speed/demos on player profiles
+- [ ] Confirm "Watch in 3D" opens the viewer tab on a real uploaded replay, and that the extra-stats query works against the live database (written against ballchasing's documented field names, not yet run there)
+
 ## Open questions for Ali
 
 Answered from NSE data during the build (please confirm):

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { TeamSwitcher } from "@/components/chrome/TeamSwitcher";
 import { Avatar, fmt1, Main, Placeholder } from "@/components/ui";
-import { leaders, MIN_GAMES_TO_RANK, playerLines, playerProfile, replayCoverage, type PlayerLine } from "@/lib/engine/players";
+import { leaders, MIN_GAMES_TO_RANK, playerAdvanced, playerLines, playerProfile, replayCoverage, type PlayerLine } from "@/lib/engine/players";
 import type { TeamPage } from "@/lib/view/team";
 
 type Scope = "game" | "totals";
@@ -33,6 +33,7 @@ export function PlayersView({ p, playerSlug, scope }: { p: TeamPage; playerSlug:
   const scrimGames = p.ds.games.filter((g) => scrimIds.has(g.seriesId) && g.processedAt).length;
   const selected = lines.find((l) => l.player.slug === playerSlug) ?? lines[0];
   const profile = selected ? playerProfile(p.ctx, selected.player.id, p.season, p.nights, p.scrims) : null;
+  const advanced = selected ? playerAdvanced(p.ctx, selected.player.id, [...p.season, ...p.scrims]) : null;
   const base = `${p.base}/players`;
   const q = scope === "totals" ? "?scope=totals" : "";
   const roleText = (r: string) => (r === "leader" ? "Team leader" : r === "sub" ? "Sub" : "Player");
@@ -177,6 +178,21 @@ export function PlayersView({ p, playerSlug, scope }: { p: TeamPage; playerSlug:
                 <div key={label} className="flex flex-col gap-[6px] bg-panel px-[18px] py-4">
                   <span className="text-[11px] tracking-[0.14em] text-muted">{label}</span>
                   <span className={`font-display text-[28px] font-bold leading-none ${value ? "" : "text-disabled"}`}>{value ?? "—"}</span>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-px border-b border-line bg-line" aria-label="Boost and movement from replays">
+              {(
+                [
+                  ["BOOST / MIN", advanced?.bpm, (v: number) => v.toFixed(0)],
+                  ["AVG SPEED", advanced?.avgSpeed, (v: number) => v.toFixed(0)],
+                  ["SUPERSONIC", advanced?.supersonicPct, (v: number) => `${v.toFixed(0)}%`],
+                  ["DEMOS / GAME", advanced?.demosPerGame, (v: number) => v.toFixed(1)],
+                ] as const
+              ).map(([label, value, fmt]) => (
+                <div key={label} className="flex flex-col gap-[6px] bg-panel px-[18px] py-4">
+                  <span className="text-[11px] tracking-[0.14em] text-muted">{label}</span>
+                  <span className={`font-display text-[24px] font-bold leading-none ${value == null ? "text-disabled" : ""}`}>{value == null ? "—" : fmt(value)}</span>
                 </div>
               ))}
             </div>

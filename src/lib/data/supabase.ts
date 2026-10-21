@@ -6,6 +6,7 @@ import type {
   ExternalStanding,
   Game,
   Night,
+  PlayerGameExtras,
   Player,
   PlayerGameStat,
   RosterEntry,
@@ -44,6 +45,41 @@ function strip<T>(rows: Row[], drop: string[]): T[] {
     for (const d of drop) delete copy[d];
     return camel<T>(copy);
   });
+}
+
+/** A numeric JSON value, else null (older replays leave these out). */
+const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+
+/**
+ * The few extra replay stats (boost, speed, demos) pulled out of `player_game_stats.extra`.
+ * Optional on purpose: if this query ever fails the site still loads, just without them.
+ */
+async function loadGameExtras(db: SupabaseClient, seasonId: string): Promise<Map<string, PlayerGameExtras>> {
+  const out = new Map<string, PlayerGameExtras>();
+  try {
+    const rows = await all((a, b) =>
+      db
+        .from("player_game_stats")
+        .select(
+          "game_id, display_name, bpm:extra->boost->bpm, avg_speed:extra->movement->avg_speed, percent_supersonic:extra->movement->percent_supersonic_speed, demos_inflicted:extra->demo->inflicted, demos_taken:extra->demo->taken, games!inner(series!inner(season_id))",
+        )
+        .eq("games.series.season_id", seasonId)
+        .range(a, b),
+    );
+    for (const r of rows) {
+      const e: PlayerGameExtras = {
+        bpm: num(r.bpm),
+        avgSpeed: num(r.avg_speed),
+        percentSupersonic: num(r.percent_supersonic),
+        demosInflicted: num(r.demos_inflicted),
+        demosTaken: num(r.demos_taken),
+      };
+      if (Object.values(e).some((v) => v !== null)) out.set(`${r.game_id}|${r.display_name}`, e);
+    }
+  } catch (e) {
+    console.warn("Extra replay stats unavailable:", e instanceof Error ? e.message : e);
+  }
+  return out;
 }
 
 export async function listSeasonsFromDb(db: SupabaseClient): Promise<Season[]> {
@@ -99,6 +135,10 @@ export async function loadDatasetFromDb(db: SupabaseClient, seasonSlug: string):
     all((a, b) => db.from("upcoming_nights").select("*").eq("season_id", sid).range(a, b)),
   ]);
 
+  const stats = strip<PlayerGameStat>(playerGameStats, ["games"]);
+  const extras = await loadGameExtras(db, sid);
+  if (extras.size) for (const s of stats) s.extras = extras.get(`${s.gameId}|${s.displayName}`) ?? null;
+
   return {
     season,
     seasons,
@@ -111,7 +151,7 @@ export async function loadDatasetFromDb(db: SupabaseClient, seasonSlug: string):
     players: strip<Player>(players, []),
     roster: strip<RosterEntry>(roster, []),
     games: strip<Game>(games, ["series"]),
-    playerGameStats: strip<PlayerGameStat>(playerGameStats, ["games"]),
+    playerGameStats: stats,
     upcoming: strip<UpcomingNight>(upcoming, []),
   };
 }

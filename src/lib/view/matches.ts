@@ -1,6 +1,7 @@
 import "server-only";
 import type { TeamSeries } from "@/lib/engine/context";
-import { seriesScoreboard } from "@/lib/engine/players";
+import { gameScoreboard, seriesScoreboard } from "@/lib/engine/players";
+import { replayPage, replayViewer } from "@/lib/ballchasing/urls";
 import { nightSlugOf } from "@/lib/engine/scouting";
 import { scrimResult, scrimScore } from "@/lib/engine/scrims";
 import { PLAYOFF_ROUND_NAMES } from "@/lib/engine/stats";
@@ -53,7 +54,17 @@ export interface MatchesView {
   selected: {
     ts: TeamSeries;
     heading: string;
-    games: Array<{ n: number; our: number | null; opp: number | null; overtime: boolean; processed: boolean }>;
+    games: Array<{
+      n: number;
+      our: number | null;
+      opp: number | null;
+      overtime: boolean;
+      processed: boolean;
+      /** ballchasing's page and 3D viewer for this game's replay, when it has one. */
+      replay: { page: string; viewer: string } | null;
+    }>;
+    /** The game whose own scoreboard is shown (from ?game=N), else the series totals. */
+    focusGame: number | null;
     /** Series score in the heading; null for a bye or an unscored scrim. */
     score: { our: number; opp: number; res: "W" | "L" | "D" } | null;
     /** Placeholder shown when there are no game slots. */
@@ -63,7 +74,7 @@ export interface MatchesView {
   } | null;
 }
 
-export function buildMatches(p: TeamPage, slug: string, seriesId: string | null): MatchesView | null {
+export function buildMatches(p: TeamPage, slug: string, seriesId: string | null, gameNo: number | null = null): MatchesView | null {
   let cards: PathCard[];
   let title: string;
   let dateLine: string;
@@ -172,17 +183,24 @@ export function buildMatches(p: TeamPage, slug: string, seriesId: string | null)
         opp: processed ? ((home ? g!.awayGoals : g!.homeGoals) ?? null) : null,
         overtime: !!g?.overtime,
         processed,
+        replay: g?.ballchasingId && processed ? { page: replayPage(g.ballchasingId), viewer: replayViewer(g.ballchasingId) } : null,
       };
     });
+    const focusGame = gameNo !== null && games.some((x) => x.n === gameNo && x.processed) ? gameNo : null;
+    const focusId = focusGame === null ? null : (p.ds.games.find((x) => x.seriesId === ts.series.id && x.gameNumber === focusGame)?.id ?? null);
     const score: NonNullable<MatchesView["selected"]>["score"] = isScrim
       ? scrim && { our: scrim.our, opp: scrim.opp, res: scrimResult(scrim)! }
       : ts.result === "BYE" || ts.our === null || ts.opp === null
         ? null
         : { our: ts.our, opp: ts.opp, res: ts.result };
+    // Colour of each scoreboard: that game's result when one game is shown, else the series result.
+    const focused = focusGame === null ? null : games.find((x) => x.n === focusGame)!;
+    const cityRes: "W" | "L" = focused ? ((focused.our ?? 0) > (focused.opp ?? 0) ? "W" : "L") : score?.res === "L" ? "L" : "W";
     selected = {
       ts,
       heading,
       games,
+      focusGame,
       score,
       empty: isScrim
         ? "No replays uploaded for this scrim yet. Player stats come from its replays."
@@ -191,8 +209,8 @@ export function buildMatches(p: TeamPage, slug: string, seriesId: string | null)
           : "Bye: no match was played.",
       boards: ts.opponent
         ? [
-            { team: p.team.name, res: "W" as const, rows: seriesScoreboard(p.ctx, ts.series.id, p.team.id) },
-            { team: ts.opponent.shortName, res: "L" as const, rows: seriesScoreboard(p.ctx, ts.series.id, ts.opponent.id) },
+            { team: p.team.name, res: cityRes, rows: focusId ? gameScoreboard(p.ctx, focusId, p.team.id) : seriesScoreboard(p.ctx, ts.series.id, p.team.id) },
+            { team: ts.opponent.shortName, res: cityRes === "W" ? ("L" as const) : ("W" as const), rows: focusId ? gameScoreboard(p.ctx, focusId, ts.opponent.id) : seriesScoreboard(p.ctx, ts.series.id, ts.opponent.id) },
           ]
         : [],
       // Head to head lives on the scouting page, which only lists this season's NSE opponents.

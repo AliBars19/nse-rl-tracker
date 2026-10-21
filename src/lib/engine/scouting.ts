@@ -359,3 +359,81 @@ export function finishedText(position: number | null, total: number, finished: b
   if (position === null) return `${total} pts`;
   return `${finished ? "Finished" : "Currently"} ${ordinal(position)}, ${total} pts`;
 }
+
+export interface OpponentPlayerLine {
+  name: string;
+  gp: number;
+  /** Per-game averages against City. */
+  score: number;
+  goals: number;
+  assists: number;
+  saves: number;
+  shots: number;
+}
+
+export interface OpponentInsights {
+  /** Replays counted (games with stats). */
+  games: number;
+  /** How those games went for City, by goals. */
+  cityGames: { won: number; lost: number };
+  /** The opponent's per-game team totals against City. */
+  team: { goals: number; shots: number; saves: number };
+  players: OpponentPlayerLine[];
+  topScorer: { name: string; goals: number; gp: number } | null;
+}
+
+/**
+ * What an opponent's players did against City, from the replays of our meetings with them.
+ * Their names are the in-game names (they are not roster players). Null with no replays.
+ */
+export function opponentInsights(ctx: Ctx, meetings: TeamSeries[], oppId: string): OpponentInsights | null {
+  const bySeries = new Map(meetings.map((m) => [m.series.id, m]));
+  const games = ctx.ds.games.filter((g) => g.processedAt && bySeries.has(g.seriesId));
+  if (!games.length) return null;
+
+  const cityGames = { won: 0, lost: 0 };
+  for (const g of games) {
+    const m = bySeries.get(g.seriesId)!;
+    const cityHome = m.series.homeTeamId === m.teamId;
+    const [us, them] = cityHome ? [g.homeGoals, g.awayGoals] : [g.awayGoals, g.homeGoals];
+    if (us === null || them === null) continue;
+    if (us > them) cityGames.won++;
+    else if (them > us) cityGames.lost++;
+  }
+
+  const ids = new Set(games.map((g) => g.id));
+  const lines = new Map<string, { name: string; games: Set<string>; score: number; goals: number; assists: number; saves: number; shots: number }>();
+  const team = { goals: 0, shots: 0, saves: 0 };
+  for (const s of ctx.ds.playerGameStats) {
+    if (!ids.has(s.gameId) || s.teamId !== oppId) continue;
+    const key = (s.displayName ?? "").trim().toLowerCase();
+    const l = lines.get(key) ?? { name: s.displayName, games: new Set<string>(), score: 0, goals: 0, assists: 0, saves: 0, shots: 0 };
+    l.games.add(s.gameId);
+    l.score += s.score ?? 0;
+    l.goals += s.goals ?? 0;
+    l.assists += s.assists ?? 0;
+    l.saves += s.saves ?? 0;
+    l.shots += s.shots ?? 0;
+    lines.set(key, l);
+    team.goals += s.goals ?? 0;
+    team.shots += s.shots ?? 0;
+    team.saves += s.saves ?? 0;
+  }
+  if (!lines.size) return null;
+
+  const n = games.length;
+  const players = [...lines.values()]
+    .sort((a, b) => b.goals - a.goals || b.score - a.score)
+    .map((l) => {
+      const gp = l.games.size;
+      return { name: l.name, gp, score: l.score / gp, goals: l.goals / gp, assists: l.assists / gp, saves: l.saves / gp, shots: l.shots / gp, total: l.goals };
+    });
+  const top = players[0];
+  return {
+    games: n,
+    cityGames,
+    team: { goals: team.goals / n, shots: team.shots / n, saves: team.saves / n },
+    players: players.map(({ total: _t, ...p }) => (void _t, p)),
+    topScorer: top && top.total > 0 ? { name: top.name, goals: top.total, gp: top.gp } : null,
+  };
+}
