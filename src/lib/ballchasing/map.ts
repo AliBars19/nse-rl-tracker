@@ -3,6 +3,8 @@
  * Field names checked against https://ballchasing.com/doc/api (Sept 2026).
  */
 
+import { sameName } from "@/lib/replay/names";
+
 export type Colour = "blue" | "orange";
 
 export interface BcCore {
@@ -76,7 +78,11 @@ export function matchPlayer(p: BcPlayer, roster: RosterPlayer[]): RosterPlayer |
     const byId = roster.find((r) => r.platformIds?.[platform] === pid);
     if (byId) return byId;
   }
-  return roster.find((r) => norm(r.nickname) === norm(p.name)) ?? null;
+  const exact = roster.find((r) => norm(r.nickname) === norm(p.name));
+  if (exact) return exact;
+  // Same name apart from case, punctuation and leetspeak ("stav1c" = "Stavic"), if it is unambiguous.
+  const like = roster.filter((r) => sameName(r.nickname, p.name));
+  return like.length === 1 ? like[0] : null;
 }
 
 /** Which colour our roster played as, by counting matched players. Null if it cannot tell. */

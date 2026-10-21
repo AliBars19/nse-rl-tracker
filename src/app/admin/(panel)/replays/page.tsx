@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminCard, Field, Notice } from "@/components/admin/ui";
 import { LinkNames, type UnlinkedName } from "@/components/admin/LinkNames";
+import { ReplaySorter } from "@/components/admin/ReplaySorter";
 import { ReplayUploader } from "@/components/admin/ReplayUploader";
 import { SeriesPicker } from "@/components/admin/SeriesPicker";
 import { adminDataset } from "@/lib/data/admin";
@@ -10,6 +11,7 @@ import { scrimScore, scrimSeries } from "@/lib/engine/scrims";
 import { PLAYOFF_ROUND_NAMES } from "@/lib/engine/stats";
 import { ballchasingToken } from "@/lib/env";
 import { dayDate } from "@/lib/view/dashboard";
+import { buildSorterTeams } from "@/lib/view/sorter";
 import { TEAM_KEYS } from "@/lib/view/team";
 
 /** Replay slots offered for a scrim: they have no fixed length. */
@@ -51,10 +53,28 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
     if (scrims.length) groups.push({ label: `${o.team.name} · scrims (player stats only)`, options: scrims });
   }
 
+  const gameIds = new Set(ds.games.map((g) => g.id));
+  const unlinked = new Map<string, UnlinkedName>();
+  const { data: unl } = await db
+    .from("player_game_stats")
+    .select("game_id, display_name, platform, team_id")
+    .is("player_id", null)
+    .in("team_id", ds.teams.filter((t) => t.ourKey).map((t) => t.id));
+  for (const r of unl ?? []) {
+    if (!gameIds.has(r.game_id)) continue;
+    const name = r.display_name as string;
+    const cur: UnlinkedName = unlinked.get(name) ?? { displayName: name, gameIds: [], platform: r.platform as string | null };
+    cur.gameIds.push(r.game_id as string);
+    unlinked.set(name, cur);
+  }
+  // Both City teams' players (a player can be on both): a replay name may belong to either.
+  const ourTeamIds = new Set(ds.teams.filter((t) => t.ourKey).map((t) => t.id));
+  const roster = [...new Map(ds.roster.filter((r) => ourTeamIds.has(r.teamId)).map((r) => ds.players.find((p) => p.id === r.playerId)!).map((p) => [p.id, { id: p.id, nickname: p.nickname }])).values()];
+
+
   const selected = typeof seriesParam === "string" ? ds.series.find((s) => s.id === seriesParam) : undefined;
   let body = <Notice>Pick a series to upload its replays.</Notice>;
   if (selected) {
-    const ourId = ds.teams.find((t) => t.ourKey && (t.id === selected.homeTeamId || t.id === selected.awayTeamId))?.id;
     const isScrim = selected.stage === "scrim";
     const games = ds.games.filter((g) => g.seriesId === selected.id).sort((a, b) => a.gameNumber - b.gameNumber);
     const entered = (selected.homeScore ?? 0) + (selected.awayScore ?? 0);
@@ -62,25 +82,6 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
     const played = isScrim ? Math.max(entered, games.at(-1)?.gameNumber ?? 0) : entered;
     const { data: statusRows } = await db.from("games").select("id, ballchasing_status").eq("series_id", selected.id);
     const statusOf = new Map((statusRows ?? []).map((r) => [r.id as string, r.ballchasing_status as string | null]));
-
-    const gameIds = new Set(ds.games.map((g) => g.id));
-    const unlinked = new Map<string, UnlinkedName>();
-    const { data: unl } = await db
-      .from("player_game_stats")
-      .select("game_id, display_name, platform, team_id")
-      .is("player_id", null)
-      .in("team_id", ds.teams.filter((t) => t.ourKey).map((t) => t.id));
-    for (const r of unl ?? []) {
-      if (!gameIds.has(r.game_id)) continue;
-      const name = r.display_name as string;
-      const cur: UnlinkedName = unlinked.get(name) ?? { displayName: name, gameIds: [], platform: r.platform as string | null };
-      cur.gameIds.push(r.game_id as string);
-      unlinked.set(name, cur);
-    }
-    const roster = ds.roster
-      .filter((r) => r.teamId === ourId)
-      .map((r) => ds.players.find((p) => p.id === r.playerId)!)
-      .map((p) => ({ id: p.id, nickname: p.nickname }));
 
     body = (
       <>
@@ -105,28 +106,29 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
         <ReplayUploader seriesId={selected.id} gamesPlayed={isScrim ? SCRIM_MAX_GAMES : played} taken={games.filter((g) => g.processedAt).map((g) => g.gameNumber)} />
       </>
     );
-    return (
-      <>
-        <AdminCard title="Replays" id="replays">
-          {!ballchasingToken() && <Notice tone="error">BALLCHASING_TOKEN is not set: uploads will fail.</Notice>}
-          <Field label="Series" htmlFor="series"><SeriesPicker groups={groups} value={selected.id} /></Field>
-          {body}
-          <p className="m-0 text-xs text-muted">
-            Replays only exist on PC: someone on each team needs to save them (or auto-upload with BakkesMod). Uploads
-            are {process.env.BALLCHASING_VISIBILITY ?? "unlisted"} on ballchasing.
-          </p>
-        </AdminCard>
-        <AdminCard title="Link players" id="link">
-          <LinkNames names={[...unlinked.values()]} roster={roster} />
-          <Link href="/admin/roster" className="text-sm">Edit platform IDs on the Roster page</Link>
-        </AdminCard>
-      </>
-    );
   }
   return (
-    <AdminCard title="Replays" id="replays">
-      <Field label="Series" htmlFor="series"><SeriesPicker groups={groups} value={null} /></Field>
-      {body}
-    </AdminCard>
+    <>
+      {!ballchasingToken() && <Notice tone="error">BALLCHASING_TOKEN is not set: uploads will fail. Add it in Vercel → Settings → Environment Variables.</Notice>}
+      <AdminCard title="Sort and upload a night" id="sort">
+        <p className="m-0 text-sm text-text-3">
+          Drop every replay from the night in one go, whichever team they came from. Each file is read to work out which NSE series
+          and game it is, then you check the list and upload. Needs the night&apos;s results imported first (Imports → NSE matches).
+        </p>
+        <ReplaySorter teams={buildSorterTeams(ds)} />
+      </AdminCard>
+      <AdminCard title="Upload to one series" id="replays">
+        <Field label="Series" htmlFor="series"><SeriesPicker groups={groups} value={selected?.id ?? null} /></Field>
+        {body}
+        <p className="m-0 text-xs text-muted">
+          Replays only exist on PC: someone on each team needs to save them (or auto-upload with BakkesMod). Uploads
+          are {process.env.BALLCHASING_VISIBILITY ?? "unlisted"} on ballchasing.
+        </p>
+      </AdminCard>
+      <AdminCard title="Link players" id="link">
+        <LinkNames names={[...unlinked.values()]} roster={roster} />
+        <Link href="/admin/roster" className="text-sm">Edit platform IDs on the Roster page</Link>
+      </AdminCard>
+    </>
   );
 }
