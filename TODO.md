@@ -6,14 +6,14 @@ detail → players.
 
 ## Phase 0: Setup
 - [x] Next.js 16 app (TypeScript, App Router, Tailwind 4, ESLint), Vitest
-- [ ] Create the Supabase project and link Vercel; add env vars (**needs Ali's accounts**, see docs/setup.md)
+- [x] Create the Supabase project and link Vercel; add env vars (done by Ali, Sept 2026)
 - [x] Fonts (Chakra Petch, IBM Plex Sans, IBM Plex Mono) and design tokens as CSS variables
 
 ## Phase 1: Data
 - [x] Schema written up in docs/data-model.md, **including proposed changes to review**
 - [x] Migration + RLS (public read, admin write, private notes). Tested on local Postgres 16 + PostgREST
 - [x] Seed: season, teams, both rosters, **every** Div 2 and Swiss series (from NSE), sheet results
-- [ ] Apply the migration and seed to the real Supabase project
+- [x] Apply the migrations and seed to the real Supabase project (scrims migration applied 2026-10-17)
 
 ## Phase 2: Engines (test first)
 - [x] `nightPoints()`: handoff Week 3/4 fixtures, Champions 4-6-4-6, Chargers 7, every Div 2 team vs the sheet
@@ -36,11 +36,12 @@ detail → players.
 - [x] ballchasing upload (sequential, 429 back-off, 409 = duplicate), polling, stat mapping, player linking
 - [x] Roster management, platform IDs, upcoming night, new season
 - [x] Scrims: admin page, Matches → SCRIMS tab, counted in player stats only (never points)
+- [ ] Automate replays (BakkesMod is offline-only since Easy Anti-Cheat, 2026-04-28): a Demos-folder watcher that sends replays here, or pulling them from ballchasing by player ID. Notes in the private caprillix-stream-setup repo, docs/RL-TRACKER.md
 - [ ] Try a real replay upload with Ali's `BALLCHASING_TOKEN` (tested against a fake ballchasing server)
 
 ## Phase 5: Ship
 - [x] Responsive check at 390 / 768 / 1440 (no horizontal scroll); axe (WCAG 2 AA) clean on all public pages
-- [ ] Deploy to Vercel production
+- [x] Deploy to Vercel production: https://nse-rl-tracker.vercel.app (every merge to `main` deploys)
 - [x] README, docs/setup.md, docs/points-engine.md, docs/data-model.md
 
 ## Open questions for Ali
