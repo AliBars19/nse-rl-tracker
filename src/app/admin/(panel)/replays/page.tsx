@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AdminCard, Field, Notice } from "@/components/admin/ui";
 import { LinkNames, type UnlinkedName } from "@/components/admin/LinkNames";
-import { ReplaySorter, type SorterSeries, type SorterTeam } from "@/components/admin/ReplaySorter";
+import { ReplaySorter } from "@/components/admin/ReplaySorter";
 import { ReplayUploader } from "@/components/admin/ReplayUploader";
 import { SeriesPicker } from "@/components/admin/SeriesPicker";
 import { adminDataset } from "@/lib/data/admin";
@@ -10,8 +10,8 @@ import { nightsForSeason } from "@/lib/engine/nights";
 import { scrimScore, scrimSeries } from "@/lib/engine/scrims";
 import { PLAYOFF_ROUND_NAMES } from "@/lib/engine/stats";
 import { ballchasingToken } from "@/lib/env";
-import { ukDateOf } from "@/lib/replay/sort";
 import { dayDate } from "@/lib/view/dashboard";
+import { buildSorterTeams } from "@/lib/view/sorter";
 import { TEAM_KEYS } from "@/lib/view/team";
 
 /** Replay slots offered for a scrim: they have no fixed length. */
@@ -24,13 +24,9 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
   const ctx = ctxOf(ds);
 
   const groups: Array<{ label: string; options: Array<{ id: string; label: string }> }> = [];
-  // What the auto-sorter may place replays on: series with a known score (it matches wins and losses).
-  const sorterTeams: SorterTeam[] = [];
-  const takenIn = (seriesId: string) => ds.games.filter((g) => g.seriesId === seriesId && g.processedAt).map((g) => g.gameNumber);
   for (const key of TEAM_KEYS) {
     const o = ourTeam(ds, key);
     if (!o) continue;
-    const sortable: SorterSeries[] = [];
     const labels = new Map<string, string>();
     for (const n of nightsForSeason(ctx, o.team.id, o.teamSeason.tier)) for (const r of n.rounds) labels.set(r.ts.series.id, `${n.night.label} · ${r.title}`);
     const options = seasonSeries(ctx, o.team.id, o.teamSeason.tier)
@@ -42,19 +38,6 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
       })
       .reverse();
     groups.push({ label: o.team.name, options });
-    for (const s of seasonSeries(ctx, o.team.id, o.teamSeason.tier)) {
-      if (!s.opponent || s.series.isForfeit || s.our === null || s.opp === null) continue;
-      const where = labels.get(s.series.id) ?? (s.series.playoffRound ? PLAYOFF_ROUND_NAMES[s.series.playoffRound] : "Playoffs");
-      sortable.push({
-        id: s.series.id,
-        label: `${where} · vs ${s.opponent.shortName} ${s.our}–${s.opp}`,
-        date: s.series.playedAt ? ukDateOf(s.series.playedAt) : (s.night?.date ?? null),
-        round: s.series.round,
-        ours: s.our,
-        theirs: s.opp,
-        taken: takenIn(s.series.id),
-      });
-    }
     const scrims = scrimSeries(ctx, o.team.id)
       .filter((s) => s.opponent)
       .map((s) => {
@@ -68,25 +51,6 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
       })
       .reverse();
     if (scrims.length) groups.push({ label: `${o.team.name} · scrims (player stats only)`, options: scrims });
-    for (const s of scrimSeries(ctx, o.team.id)) {
-      const score = s.opponent ? scrimScore(ctx, s) : null;
-      if (!s.opponent || score?.source !== "entered" || !s.series.playedAt) continue;
-      sortable.push({
-        id: s.series.id,
-        label: `Scrim · ${dayDate(s.series.playedAt)} · vs ${s.opponent.shortName} ${score.our}–${score.opp}`,
-        date: ukDateOf(s.series.playedAt),
-        round: null,
-        ours: score.our,
-        theirs: score.opp,
-        taken: takenIn(s.series.id),
-      });
-    }
-    sorterTeams.push({
-      key,
-      name: o.team.name,
-      rosterNames: ds.roster.filter((r) => r.teamId === o.team.id).map((r) => ds.players.find((p) => p.id === r.playerId)?.nickname ?? ""),
-      series: sortable,
-    });
   }
 
   const gameIds = new Set(ds.games.map((g) => g.id));
@@ -151,7 +115,7 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
           Drop every replay from the night in one go, whichever team they came from. Each file is read to work out which NSE series
           and game it is, then you check the list and upload. Needs the night&apos;s results imported first (Imports → NSE matches).
         </p>
-        <ReplaySorter teams={sorterTeams} />
+        <ReplaySorter teams={buildSorterTeams(ds)} />
       </AdminCard>
       <AdminCard title="Upload to one series" id="replays">
         <Field label="Series" htmlFor="series"><SeriesPicker groups={groups} value={selected?.id ?? null} /></Field>

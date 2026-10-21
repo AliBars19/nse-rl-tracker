@@ -91,6 +91,13 @@ describe("sortReplays", () => {
     expect(r.placements[0]).toMatchObject({ colour: "orange", won: true, seriesId: "s", gameNumber: 1 });
   });
 
+  it("recognises roster players despite leetspeak and punctuation (a single replay is enough)", () => {
+    n = 0;
+    const g = game(2, 1, "A", { orange: true });
+    const r = sortReplays([g], { key: "c", rosterNames: ["Stavic", "Yameen", "Kid"], series: [series("s", 1, 0)] });
+    expect(r.placements[0]).toMatchObject({ colour: "orange", won: true, seriesId: "s" });
+  });
+
   it("leaves a series with no replays out instead of mis-filing the rest", () => {
     const all = champions();
     const noR2 = all.filter((g) => g.replayName !== "NSEMD1G2");
@@ -128,6 +135,46 @@ describe("sortReplays", () => {
     n = 0;
     const r = sortReplays([game(1, 0, "A")], { key: "c", rosterNames: [], series: [series("s", 1, 0)] });
     expect(r.placements[0]).toMatchObject({ colour: null, seriesId: null });
+  });
+});
+
+describe("partial uploads (a series that cannot be fitted by score)", () => {
+  const champs = { key: "champions", rosterNames: ["Stavic", "Yameen"], series: [R1, R2, R3] };
+
+  it("places a lone replay by its lobby round, marked as a guess", () => {
+    n = 0;
+    const r = sortReplays([game(2, 1, "A", { name: "NSEMD1G2" })], champs);
+    expect(r.placements[0]).toMatchObject({ seriesId: "r2-solent", gameNumber: 1, colour: "blue", won: true, guess: true });
+    expect(r.matched).toBe(0);
+    expect(r.guessed).toBe(1);
+  });
+
+  it("numbers several partial replays in match order", () => {
+    n = 0;
+    const r = sortReplays([game(1, 2, "A", { name: "NSEMD1G3" }), game(0, 1, "A", { name: "NSEMD1G3" })], champs);
+    expect(r.placements.map((p) => [p.seriesId, p.gameNumber, p.guess])).toEqual([["r3-durham", 1, true], ["r3-durham", 2, true]]);
+  });
+
+  it("does not guess without a lobby round, or when two series share it", () => {
+    n = 0;
+    const none = sortReplays([game(2, 1, "A")], champs);
+    expect(none.placements[0]).toMatchObject({ seriesId: null, colour: "blue" });
+    const twin = sortReplays([game(2, 1, "A", { name: "NSEMD1G1" })], { ...champs, series: [R1, { ...R1, id: "dup" }] });
+    expect(twin.placements[0].seriesId).toBeNull();
+  });
+
+  it("never overrides a series fitted by score", () => {
+    const r = sortReplays(champions(), champs);
+    expect(r.placements.some((p) => p.guess)).toBe(false);
+    expect(r.guessed).toBe(0);
+  });
+
+  it("sortForTeams picks the team by roster evidence when no score fits", () => {
+    n = 0;
+    const cmd = { key: "commanders", rosterNames: ["Junxi", "SafRL"], series: [series("cmd-r1", 1, 3, { round: 1 })] };
+    const r = sortForTeams([game(2, 1, "A", { name: "NSEMD1G1" })], [cmd, champs]);
+    expect(r.teamKey).toBe("champions");
+    expect(r.result?.placements[0]).toMatchObject({ seriesId: "r1-ghosts", guess: true });
   });
 });
 

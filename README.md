@@ -20,11 +20,16 @@ because Week 1 has not been imported. Don't re-create the season.
 
 **Where replays go:** upload them on **our own site**, not on ballchasing: sign in at `/admin` →
 *Replays* → **Sort and upload a night**. Drop every `.replay` file from the night (any names, any order,
-both teams). The page reads each file's header in the browser (start time, score, players, lobby name
-like `NSEMD1G2`), works out which team they are, puts them on the right NSE series and game numbers
-by matching wins/losses to the series scores, and shows a table to check. **Upload** then sends them
-one at a time through our server to ballchasing and saves the stats. It needs the night's results
-imported first (*Imports → NSE matches*). *Upload to one series* below it is the manual fallback.
+both teams). In the browser the page reads each file's header (start time, score, players, lobby name like
+`NSEMD1G2`), and:
+- if the site has no results for that day yet it **fetches them from NSE itself** (`syncNseForDates` in
+  `src/lib/actions/admin.ts`, the same import as *Imports → NSE matches*; there is also a "Fetch results from NSE" button);
+- works out which team the files are (the series scores they add up to, else roster names, matched loosely so
+  `stav1c` = "Stavic");
+- puts them on the right series and game numbers by matching wins/losses to the series scores. Replays it can only
+  place from the lobby round (e.g. a series with just some of its games saved) are marked **"Ready (guess)"**: check the game number.
+A table shows the result for review; **Upload** then sends them one at a time through our server to ballchasing and saves the stats.
+*Upload to one series* below it is the manual fallback.
 Rocket League replays (`.replay`) only exist on PC (on Linux: the `Demos` folder inside the Wine/Proton prefix).
 The `BALLCHASING_TOKEN` is a Vercel environment variable (server only, added 29 Sep): if it is missing, the
 Replays and Admin pages show a red banner. Claude sessions cannot read Vercel env vars or sign in as admin,

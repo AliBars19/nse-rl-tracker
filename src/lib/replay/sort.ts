@@ -12,6 +12,8 @@
  * anything is uploaded.
  */
 
+import { looseName } from "./names";
+
 export type Colour = "blue" | "orange";
 
 export interface SortReplay {
@@ -50,14 +52,20 @@ export interface Placement {
   won: boolean | null;
   seriesId: string | null;
   gameNumber: number | null;
+  /** Placed from the lobby round alone because no series score fitted: worth a second look. */
+  guess?: boolean;
 }
 
 export interface SortResult {
   teamKey: string;
   /** In match order, one per input replay. */
   placements: Placement[];
-  /** How many replays were placed on a series. */
+  /** Replays placed on a series because the results add up. */
   matched: number;
+  /** Replays placed from their lobby round only (see Placement.guess). */
+  guessed: number;
+  /** Replays in which a roster name identified City's side. */
+  rosterHits: number;
 }
 
 /** NSE lobbies are named 'NSEMD<match day>G<round>': returns the round, else null. */
@@ -73,20 +81,25 @@ const dayOf = (startedAt: number) => ukDay.format(new Date(startedAt * 1000));
 /** UK calendar day of an ISO timestamp, 'YYYY-MM-DD'. */
 export const ukDateOf = (iso: string) => ukDay.format(new Date(iso));
 
-/** Which colour was City in each replay (null = unknown). */
-function ourColours(replays: SortReplay[], rosterNames: string[]): Array<Colour | null> {
-  const roster = new Set(rosterNames.map(norm));
+/** Which colour was City in each replay (null = unknown), and in how many a roster name decided it. */
+function ourColours(replays: SortReplay[], rosterNames: string[]): { colours: Array<Colour | null>; rosterHits: number } {
+  const onRoster = (name: string) => rosterNames.some((r) => looseName(name, r));
   const seen = new Map<string, number>();
   for (const r of replays) for (const n of new Set(r.players.map((p) => norm(p.name)))) seen.set(n, (seen.get(n) ?? 0) + 1);
-  return replays.map((r) => {
+  let rosterHits = 0;
+  const colours = replays.map((r) => {
     const count = (team: 0 | 1, weight: (name: string) => number) => r.players.filter((p) => p.team === team).reduce((s, p) => s + weight(norm(p.name)), 0);
-    for (const weight of [(n: string) => (roster.has(n) ? 1 : 0), (n: string) => (seen.get(n) ?? 1) - 1]) {
+    const byRoster = [(n: string) => (onRoster(n) ? 1 : 0), (n: string) => (seen.get(n) ?? 1) - 1];
+    for (const [i, weight] of byRoster.entries()) {
       const blue = count(0, weight);
       const orange = count(1, weight);
-      if (blue !== orange) return blue > orange ? "blue" : "orange";
+      if (blue === orange) continue;
+      if (i === 0) rosterHits++;
+      return blue > orange ? ("blue" as const) : ("orange" as const);
     }
     return null;
   });
+  return { colours, rosterHits };
 }
 
 interface Block {
@@ -148,7 +161,7 @@ function fit(results: boolean[], hints: Array<number | null>, series: SortSeries
 
 export function sortReplays(input: SortReplay[], team: SortTeam): SortResult {
   const replays = [...input].sort((a, b) => a.startedAt - b.startedAt || a.id.localeCompare(b.id));
-  const colours = ourColours(replays, team.rosterNames);
+  const { colours, rosterHits } = ourColours(replays, team.rosterNames);
   const won = replays.map((r, i) => {
     if (!colours[i] || r.team0Score === r.team1Score) return null;
     const ours = colours[i] === "blue" ? r.team0Score : r.team1Score;
@@ -183,18 +196,40 @@ export function sortReplays(input: SortReplay[], team: SortTeam): SortResult {
         }
       }
     }
+
+    // Whatever the scores could not place (a series with only some of its games saved, say):
+    // use the lobby round, if exactly one series that day is that round. Marked as a guess.
+    const used = new Map<string, Set<number>>();
+    for (const i of idx) if (placements[i].seriesId) used.set(placements[i].seriesId!, (used.get(placements[i].seriesId!) ?? new Set()).add(placements[i].gameNumber!));
+    for (const i of idx) {
+      const p = placements[i];
+      const round = lobbyRound(replays[i].replayName);
+      if (p.seriesId || round === null) continue;
+      const options = candidates.filter((c) => c.round === round);
+      if (options.length !== 1) continue;
+      const taken = used.get(options[0].id) ?? new Set<number>();
+      let game = 1;
+      while (taken.has(game)) game++;
+      used.set(options[0].id, taken.add(game));
+      Object.assign(p, { seriesId: options[0].id, gameNumber: game, guess: true });
+    }
   }
-  return { teamKey: team.key, placements, matched: placements.filter((p) => p.seriesId).length };
+  const guessed = placements.filter((p) => p.guess).length;
+  return { teamKey: team.key, placements, matched: placements.filter((p) => p.seriesId).length - guessed, guessed, rosterHits };
 }
 
 /**
- * Both City teams play on the same nights, so decide whose replays these are: the team whose
- * series scores they add up to. Null team when none fits or two fit equally well.
+ * Both City teams play on the same nights, so decide whose replays these are. First choice: the
+ * team whose series scores they add up to. If none do (partial uploads), the team whose roster
+ * names appear in the replays. Null team when nothing separates them.
  */
 export function sortForTeams(replays: SortReplay[], teams: SortTeam[]): { teamKey: string | null; result: SortResult | null; byTeam: SortResult[] } {
   const byTeam = teams.map((t) => sortReplays(replays, t));
-  const top = Math.max(0, ...byTeam.map((r) => r.matched));
-  const best = byTeam.filter((r) => r.matched === top);
-  if (top === 0 || best.length !== 1) return { teamKey: null, result: null, byTeam };
-  return { teamKey: best[0].teamKey, result: best[0], byTeam };
+  const pick = (score: (r: SortResult) => number) => {
+    const top = Math.max(0, ...byTeam.map(score));
+    const best = byTeam.filter((r) => score(r) === top);
+    return top > 0 && best.length === 1 ? best[0] : null;
+  };
+  const best = pick((r) => r.matched) ?? pick((r) => r.guessed) ?? pick((r) => r.rosterHits);
+  return { teamKey: best?.teamKey ?? null, result: best, byTeam };
 }

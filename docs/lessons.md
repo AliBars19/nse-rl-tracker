@@ -38,4 +38,11 @@ Things that went wrong once and how they were fixed, so nobody has to rediscover
 - **Header quirk:** byte properties are either an enum name + enum value, or `None` + one raw byte (PlayStation IDs use the latter).
 - Both City teams play at the same time, so a night's replays are assigned to whichever team's series scores they add up to
   (e.g. Champions 3–1, 3–1, 0–3 vs Commanders 1–3, 0–3, 3–1 are different win/loss tallies over the same 11 games).
+- **Sorting without the night's results is impossible** (series scores are what the replays are matched against), so the sorter fetches the NSE
+  `stage-1` / `week-N` pages for the days it sees (`syncNseForDates`). Pages that are not published yet 404; that is skipped, not an error.
+- **NSE match pages list both rosters by NSE nickname** (`/matches/<id>`: e.g. `kid`, `stav1c`, `yams`), which only loosely match in-game names
+  (`kidwys`, `yam.een`), and NSE profile pages carry no Epic/Steam IDs. So roster evidence uses the site roster with loose matching
+  (`src/lib/replay/names.ts`): `sameName` (strict, for attributing stats) vs `looseName` (prefix/contains, for deciding which side was City only).
+- **A lone replay cannot be fitted by score** (a series needs all its games). It is placed from the lobby round if exactly one series that day has
+  that round, and flagged as a guess.
 

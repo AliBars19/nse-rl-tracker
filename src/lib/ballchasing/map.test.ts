@@ -32,6 +32,11 @@ describe("ballchasing mapping", () => {
     expect(matchPlayer(replay.blue!.players![1], roster)?.id).toBe("p-yams");
     expect(matchPlayer(replay.blue!.players![0], roster)?.id).toBe("p-cap");
     expect(matchPlayer({ name: "Stranger" }, roster)).toBeNull();
+    // in-game names differ from roster nicknames by case, punctuation and leetspeak
+    expect(matchPlayer({ name: "K.i.d" }, roster)?.id).toBe("p-kid");
+    expect(matchPlayer({ name: "YAM5" }, roster)?.id).toBe("p-yams");
+    // ...but never guess between two candidates
+    expect(matchPlayer({ name: "y.ams" }, [...roster, { id: "p-y2", nickname: "Y.a.m.s", platformIds: null }])).toBeNull();
   });
 
   it("detects which colour we played", () => {

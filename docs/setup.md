@@ -56,9 +56,9 @@ so there is no all-powerful key sitting on the server.
    - Admin → *Nights* → type City's three results (live points preview).
 3. Admin → *Imports* → **Standings sheet** → Fetch & preview → Apply (other teams' points).
 4. Admin → *Replays* → **Sort and upload a night**: drop all the night's `.replay` files (both teams, any
-   order). Check the table (team, series, game number, colour), then **Upload**. Link any unmatched
-   in-game names to roster players once on the *Link players* card; after that they match automatically.
-   (*Upload to one series* is the manual fallback.)
+   order). If the night's results are not in the site yet they are fetched from NSE automatically. Check the table
+   (team, series, game number, colour; "guess" rows need a look), then **Upload**. Link any unmatched in-game names to
+   roster players once on the *Link players* card; after that they match automatically. (*Upload to one series* is the manual fallback.)
 5. Admin → *Upcoming* → set next week (or Clear when the league ends).
 6. **Scrims** (any day): Admin → *Scrims* → add the date and opponent (score optional), then
    upload its replays on *Replays* (the scrims are listed under each team). They count for
