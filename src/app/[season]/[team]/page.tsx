@@ -10,6 +10,7 @@ import {
   RosterPanel,
   Scenarios,
   ScenariosPhone,
+  Stage1Qualification,
   Standings,
   StandingsPhone,
   Tiles,
@@ -35,6 +36,7 @@ export default async function DashboardPage({ params }: PageProps<"/[season]/[te
     <Main>
       <Hero v={v} switcher={switcher} />
       <Tiles v={v} />
+      {v.qualification && <Stage1Qualification q={v.qualification} />}
 
       {/* Phone order: form, nights, scenarios, standings (Mobile.dc.html). */}
       <div className="flex flex-col gap-5 lg:hidden">

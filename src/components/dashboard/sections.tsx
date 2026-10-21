@@ -60,6 +60,48 @@ export function Tiles({ v }: { v: DashboardView }) {
   );
 }
 
+// ------------------------------------------------------------------ Stage 1 qualification
+
+/** Stage 1 (Winter 26): wins so far, wins needed for Div 1 and the six rounds as W/L chips. */
+export function Stage1Qualification({ q }: { q: NonNullable<DashboardView["qualification"]> }) {
+  const tone = q.status === "qualified" ? "border-win" : q.status === "out" ? "border-loss" : "border-accent";
+  return (
+    <section aria-labelledby="stage1-title" className={`flex flex-col gap-4 border border-line border-l-4 bg-panel px-4 py-5 md:px-7 ${tone}`}>
+      <div className="flex flex-col gap-1 md:flex-row md:items-baseline md:justify-between">
+        <h2 id="stage1-title" className="h-section text-lg md:text-[22px]">Stage 1 · Qualifying for Division 1</h2>
+        <span className="text-sm text-text-3">{q.rules.winsForDiv1} wins from {q.rules.rounds} rounds. Everyone else goes to the Swiss.</span>
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="font-display text-[34px] font-bold uppercase leading-none md:text-[44px]">{q.headline}</span>
+        <span className="text-[15px] text-text-2">
+          {q.wins}–{q.losses} after {q.played} of {q.rules.rounds} rounds · {q.detail}
+        </span>
+      </div>
+      <ol className="m-0 grid list-none grid-cols-3 gap-2 p-0 md:grid-cols-6" aria-label="Rounds">
+        {q.rounds.map(({ round, result }) => (
+          <li
+            key={round}
+            className={`flex min-h-[84px] flex-col gap-[6px] p-3 ${result ? (result.won ? "border border-line border-t-4 border-t-win bg-inset" : "border border-line border-t-4 border-t-loss bg-inset") : "border border-dashed border-line-strong bg-inset"}`}
+          >
+            <span className="text-xs tracking-[0.14em] text-muted">ROUND {round}</span>
+            {result ? (
+              <>
+                <span className="flex items-baseline gap-2">
+                  <span className={`font-display text-2xl font-bold ${result.won ? "text-win" : "text-loss"}`}>{result.won ? "W" : "L"}</span>
+                  <span className="font-mono text-sm">{result.score}</span>
+                </span>
+                <span className="truncate text-xs text-text-3" title={result.opponent}>{result.opponent}</span>
+              </>
+            ) : (
+              <span className="font-display text-2xl font-bold text-disabled">—</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 // ------------------------------------------------------------------ league nights
 
 function Legend() {

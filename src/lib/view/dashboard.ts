@@ -1,8 +1,10 @@
 import "server-only";
 import { formTag } from "@/lib/import/names";
+import { fromSide } from "@/lib/engine/context";
 import { LADDER_ORDER } from "@/lib/engine/points";
 import { playerLines } from "@/lib/engine/players";
 import { scenarioPreview, type ScenarioPreview } from "@/lib/engine/preview";
+import { QUALIFICATION_RULES, qualification, stage1Results, type Qualification } from "@/lib/engine/qualification";
 import { TIER_NAMES } from "@/lib/engine/rulesets";
 import { standingsTable, type StandingsTable } from "@/lib/engine/standings";
 import { fmtRecord, form, ordinal, PLAYOFF_ROUND_NAMES, playoffSummary, seasonStats } from "@/lib/engine/stats";
@@ -54,10 +56,20 @@ export interface DashboardView {
   form: Array<{ key: string; res: "W" | "L"; tag: string; score: string; opp: string }>;
   ladder: { tierName: string; rows: Array<{ path: string; extra: string; pts: number; hits: string }> } | null;
   ladderNote: string;
+  /** Stage 1: wins needed for Div 1. Only for seasons with qualification rules, once a Stage 1 series exists. */
+  qualification: Qualification | null;
   roster: Array<{ name: string; slug: string; role: string; line: string | null }>;
   scenarios: ScenarioPreview | null;
   standings: StandingsTable;
   tierName: string;
+}
+
+function stage1Qualification(p: TeamPage): Qualification | null {
+  const rules = QUALIFICATION_RULES[p.ds.season.slug];
+  if (!rules) return null;
+  const mine = (p.ctx.seriesByTeam.get(p.team.id) ?? []).filter((s) => s.seasonId === p.ds.season.id && s.stage === "placement");
+  if (!mine.length) return null;
+  return qualification(stage1Results(mine.map((s) => fromSide(p.ctx, s, p.team.id))), rules);
 }
 
 export function buildDashboard(p: TeamPage): DashboardView {
@@ -184,6 +196,7 @@ export function buildDashboard(p: TeamPage): DashboardView {
     })),
     ladder,
     ladderNote: ruleset.note,
+    qualification: stage1Qualification(p),
     roster,
     scenarios: scenarioPreview(ctx, team.id, teamSeason.tier),
     standings: table,

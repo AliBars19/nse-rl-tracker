@@ -159,7 +159,7 @@ export function MatchesView({ p, v, tabs, current, isAdmin }: { p: TeamPage; v: 
                           {focused ? "Showing" : "Scoreboard"}
                         </Link>
                         {g.replay && (
-                          <a href={g.replay.viewer} target="_blank" rel="noreferrer" className="flex min-h-10 items-center font-semibold">
+                          <a href={g.replay.viewer} target="_blank" rel="noreferrer" title="Opens ballchasing's 3D viewer. ballchasing may ask you to sign in." className="flex min-h-10 items-center font-semibold">
                             Watch in 3D<span className="sr-only"> (opens ballchasing)</span>&nbsp;↗
                           </a>
                         )}
@@ -192,6 +192,7 @@ export function MatchesView({ p, v, tabs, current, isAdmin }: { p: TeamPage; v: 
                     <a href={sel.games.find((g) => g.n === sel.focusGame)!.replay!.page} target="_blank" rel="noreferrer" className="flex min-h-11 items-center">
                       Full stats on ballchasing ↗
                     </a>
+                    <span className="max-w-[260px] text-xs leading-snug text-muted">ballchasing may ask you to sign in before its 3D viewer will load.</span>
                   </>
                 )}
                 {sel.focusGame && (
