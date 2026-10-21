@@ -102,9 +102,44 @@ export async function ScoutingView({ p, oppSlug }: { p: TeamPage; oppSlug: strin
                     </li>
                   ))}
                 </ul>
-                <Placeholder className="mt-[6px]" right={`${s.coverage.processed} / ${s.coverage.total} games`}>
-                  Top scorer, shots and saves vs City appear once replays are uploaded.
-                </Placeholder>
+                {s.insights ? (
+                  <div className="mt-[6px] flex flex-col gap-3 border-t border-line pt-4">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h3 className="m-0 font-display text-base font-bold uppercase tracking-[0.06em]">Their players vs City</h3>
+                      <span className="text-xs text-muted">{s.coverage.processed} / {s.coverage.total} games with replays</span>
+                    </div>
+                    <p className="m-0 text-sm leading-normal text-text-3">
+                      City won <strong className="text-win">{s.insights.cityGames.won}</strong> and lost <strong className="text-loss">{s.insights.cityGames.lost}</strong> of the games with replays.
+                      {s.insights.topScorer && (
+                        <>
+                          {" "}Their top scorer is <strong className="text-text">{s.insights.topScorer.name}</strong> with {s.insights.topScorer.goals} {s.insights.topScorer.goals === 1 ? "goal" : "goals"} in {s.insights.topScorer.gp} {s.insights.topScorer.gp === 1 ? "game" : "games"}.
+                        </>
+                      )}{" "}
+                      As a team they average {s.insights.team.goals.toFixed(1)} goals, {s.insights.team.shots.toFixed(1)} shots and {s.insights.team.saves.toFixed(1)} saves a game against us.
+                    </p>
+                    <div role="table" aria-label={`${s.team.shortName} players against City, per game`}>
+                      <div role="row" className="grid grid-cols-[minmax(0,1fr)_repeat(6,38px)] border-b border-line py-2 text-xs tracking-[0.12em] text-muted">
+                        <span role="columnheader">PLAYER</span>
+                        {["GP", "G", "A", "SV", "SH", "SCORE"].map((h) => (
+                          <span role="columnheader" key={h} className="text-right">{h}</span>
+                        ))}
+                      </div>
+                      {s.insights.players.map((r) => (
+                        <div role="row" key={r.name} className="grid h-11 grid-cols-[minmax(0,1fr)_repeat(6,38px)] items-center border-b border-divider font-mono text-text-2">
+                          <span role="cell" className="truncate font-sans text-text">{r.name}</span>
+                          {[r.gp.toString(), r.goals.toFixed(1), r.assists.toFixed(1), r.saves.toFixed(1), r.shots.toFixed(1), r.score.toFixed(0)].map((x, j) => (
+                            <span role="cell" key={j} className="text-right">{x}</span>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                    <span className="text-xs text-muted">Per game, against City. Names are the in-game names from the replays.</span>
+                  </div>
+                ) : (
+                  <Placeholder className="mt-[6px]" right={`${s.coverage.processed} / ${s.coverage.total} games`}>
+                    Top scorer, shots and saves vs City appear once replays are uploaded.
+                  </Placeholder>
+                )}
               </div>
             </section>
 

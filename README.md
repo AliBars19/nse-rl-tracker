@@ -62,6 +62,15 @@ Treat as unconfirmed until NSE or Ali says so.
 | City Champions | W 3–1 NSCG Ghosts | W 3–1 Solent Cardinals | L 0–3 Durham Defenders RL | 2 (needs 2 more wins) |
 | City Commanders | L 1–3 UWE Sea Stags RL | L 0–3 No Execuses | W 3–1 Leic Is More | 3 (needs 3 more wins) |
 
+**Per-game pages, scouting and extra stats (21 Oct 2026):**
+- *Matches*: every game box is clickable (`?series=<id>&game=N`) and shows that game's own scoreboard, with **Watch in 3D** (ballchasing's
+  replay page on its viewer tab, `https://ballchasing.com/replay/<id>#watch`) and **Full stats on ballchasing** links. Only shown when the game has a
+  replay. The links work for *unlisted* and *public* replays, not *private* ones: keep `BALLCHASING_VISIBILITY` at `unlisted` (the default) or `public`
+  in Vercel (a change only affects replays uploaded afterwards).
+- *Scouting*: "Their players vs City" (per-game goals, assists, saves, shots, score, plus top scorer and team averages) from replays of our meetings.
+- *Players*: boost/min, average speed, supersonic % and demos/game from the stats stored with each replay (`player_game_stats.extra`). They are read by a
+  separate, guarded query (`loadGameExtras`), so if it ever fails the site still loads and they show "—".
+
 **What is not built yet** (see TODO.md): a Winter 26 ruleset in `src/lib/engine/rulesets.ts`
 (Stage 1 is a wins-based qualification, not the Spring points ladder), a "wins needed for
 Div 1" view for the Stage 1 dashboard, and the real-replay upload test.

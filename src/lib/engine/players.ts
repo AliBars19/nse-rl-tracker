@@ -180,3 +180,41 @@ export function seriesScoreboard(ctx: Ctx, seriesId: string, teamId: string) {
   }
   return [...rows.values()].sort((a, b) => b.score - a.score);
 }
+
+/** Scoreboard for one side of ONE game (a single replay), best score first. */
+export function gameScoreboard(ctx: Ctx, gameId: string, teamId: string) {
+  return ctx.ds.playerGameStats
+    .filter((s) => s.gameId === gameId && s.teamId === teamId)
+    .map((s) => ({
+      ...add(ZERO, s),
+      name: ctx.ds.players.find((p) => p.id === s.playerId)?.nickname ?? s.displayName,
+    }))
+    .sort((a, b) => b.score - a.score);
+}
+
+export interface PlayerAdvanced {
+  /** Games the player has a replay for (some may lack the extra stats). */
+  games: number;
+  bpm: number | null;
+  avgSpeed: number | null;
+  supersonicPct: number | null;
+  demosPerGame: number | null;
+}
+
+/** Averages of the extra replay stats over the games that carry each one. Null when none do. */
+export function playerAdvanced(ctx: Ctx, playerId: string, series: TeamSeries[]): PlayerAdvanced | null {
+  const gameIds = new Set(processedGames(ctx, new Set(series.map((s) => s.series.id))).map((g) => g.id));
+  const mine = ctx.ds.playerGameStats.filter((s) => s.playerId === playerId && gameIds.has(s.gameId));
+  const avg = (pick: (e: NonNullable<PlayerGameStat["extras"]>) => number | null): number | null => {
+    const v = mine.flatMap((s) => (s.extras ? [pick(s.extras)] : [])).filter((x): x is number => typeof x === "number");
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  };
+  const out = {
+    games: new Set(mine.map((s) => s.gameId)).size,
+    bpm: avg((e) => e.bpm),
+    avgSpeed: avg((e) => e.avgSpeed),
+    supersonicPct: avg((e) => e.percentSupersonic),
+    demosPerGame: avg((e) => e.demosInflicted),
+  };
+  return out.bpm === null && out.avgSpeed === null && out.supersonicPct === null && out.demosPerGame === null ? null : out;
+}

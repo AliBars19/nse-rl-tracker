@@ -132,24 +132,42 @@ export function MatchesView({ p, v, tabs, current, isAdmin }: { p: TeamPage; v: 
 
           {sel.games.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 border-b border-line px-4 py-5 sm:grid-cols-3 md:px-7 md:py-[22px] lg:grid-cols-5">
-              {sel.games.map((g) => (
-                <div
-                  key={g.n}
-                  className={`flex flex-col gap-2 bg-inset p-4 ${g.processed ? "border border-line" : "border border-dashed border-line-strong"}`}
-                >
-                  <span className="text-xs tracking-[0.14em] text-muted">GAME {g.n}</span>
-                  {g.processed ? (
-                    <span className="font-mono text-[26px] font-semibold">
-                      <span className={(g.our ?? 0) > (g.opp ?? 0) ? "text-win" : "text-loss"}>{g.our}</span>
-                      <span className="text-disabled"> : </span>
-                      <span>{g.opp}</span>
-                    </span>
-                  ) : (
-                    <span className="font-mono text-[26px] font-semibold text-disabled">– : –</span>
-                  )}
-                  <span className="text-xs text-text-3">{g.processed ? (g.overtime ? "Overtime" : "From replay") : "Awaiting replay"}</span>
-                </div>
-              ))}
+              {sel.games.map((g) => {
+                const focused = sel.focusGame === g.n;
+                const href = `${base}/${current}?series=${sel.ts.series.id}&game=${g.n}`;
+                const won = g.processed && (g.our ?? 0) > (g.opp ?? 0);
+                return (
+                  <div
+                    key={g.n}
+                    className={`flex flex-col gap-2 bg-inset p-4 ${focused ? "border-2 border-accent" : g.processed ? "border border-line" : "border border-dashed border-line-strong"}`}
+                  >
+                    <span className="text-xs tracking-[0.14em] text-muted">GAME {g.n}</span>
+                    {g.processed ? (
+                      <span className="font-mono text-[26px] font-semibold">
+                        <span className={won ? "text-win" : "text-loss"}>{g.our}</span>
+                        <span className="text-disabled"> : </span>
+                        <span>{g.opp}</span>{" "}
+                        <span className={`font-display text-base font-bold ${won ? "text-win" : "text-loss"}`}>{won ? "W" : "L"}</span>
+                      </span>
+                    ) : (
+                      <span className="font-mono text-[26px] font-semibold text-disabled">– : –</span>
+                    )}
+                    <span className="text-xs text-text-3">{g.processed ? (g.overtime ? "Overtime" : "From replay") : "Awaiting replay"}</span>
+                    {g.processed && (
+                      <div className="mt-1 flex flex-wrap gap-x-4 text-xs">
+                        <Link href={href} scroll={false} aria-current={focused ? "true" : undefined} className="flex min-h-10 items-center font-semibold">
+                          {focused ? "Showing" : "Scoreboard"}
+                        </Link>
+                        {g.replay && (
+                          <a href={g.replay.viewer} target="_blank" rel="noreferrer" className="flex min-h-10 items-center font-semibold">
+                            Watch in 3D<span className="sr-only"> (opens ballchasing)</span>&nbsp;↗
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="border-b border-line px-4 py-5 md:px-7">
@@ -157,8 +175,36 @@ export function MatchesView({ p, v, tabs, current, isAdmin }: { p: TeamPage; v: 
             </div>
           )}
 
+          {sel.boards.length > 0 && sel.games.some((g) => g.processed) && (
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-5 md:px-7">
+              <span className="text-xs tracking-[0.14em] text-muted">{sel.focusGame ? `GAME ${sel.focusGame} SCOREBOARD` : "SERIES TOTALS"}</span>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+                {sel.focusGame && sel.games.find((g) => g.n === sel.focusGame)?.replay && (
+                  <>
+                    <a
+                      href={sel.games.find((g) => g.n === sel.focusGame)!.replay!.viewer}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex h-11 items-center bg-accent px-5 font-display text-sm font-bold tracking-[0.1em] text-on-accent no-underline hover:bg-accent-hover hover:text-on-accent"
+                    >
+                      WATCH IN 3D ↗<span className="sr-only"> (opens ballchasing)</span>
+                    </a>
+                    <a href={sel.games.find((g) => g.n === sel.focusGame)!.replay!.page} target="_blank" rel="noreferrer" className="flex min-h-11 items-center">
+                      Full stats on ballchasing ↗
+                    </a>
+                  </>
+                )}
+                {sel.focusGame && (
+                  <Link href={`${base}/${current}?series=${sel.ts.series.id}`} scroll={false} className="flex min-h-11 items-center">
+                    Show series totals
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+
           {sel.boards.length > 0 && (
-            <div className="grid gap-7 px-4 pb-7 pt-5 md:grid-cols-2 md:px-7 md:pt-[22px]">
+            <div className="grid gap-7 px-4 pb-7 pt-4 md:grid-cols-2 md:px-7 md:pt-4">
               {sel.boards.map((b) => (
                 <div key={b.team} className="flex flex-col">
                   <div className="flex items-center gap-[10px] pb-3">

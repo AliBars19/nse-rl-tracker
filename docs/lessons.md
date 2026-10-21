@@ -45,4 +45,10 @@ Things that went wrong once and how they were fixed, so nobody has to rediscover
   (`src/lib/replay/names.ts`): `sameName` (strict, for attributing stats) vs `looseName` (prefix/contains, for deciding which side was City only).
 - **A lone replay cannot be fitted by score** (a series needs all its games). It is placed from the lobby round if exactly one series that day has
   that round, and flagged as a guess.
+- **ballchasing replay pages have tabs**, and their own menu link for the 3D viewer is `#watch` (`/replay/<id>#watch`); there is no separate viewer URL.
+  Unlisted replays open for anyone with the link; private ones only for the owner.
+- **`player_game_stats.extra`** holds ballchasing's per-player `boost`, `movement`, `positioning` and `demo` groups (field names in
+  https://ballchasing.com/doc/api). They are pulled out with PostgREST JSON paths (`bpm:extra->boost->bpm`) in `loadGameExtras`, kept out of the main
+  dataset query so a bad path cannot take the site down.
+- **ballchasing free accounts**: 10 uploads per rolling 24 h by default (20 max, 70 per week). See docs/setup.md.
 

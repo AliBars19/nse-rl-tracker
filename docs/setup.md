@@ -34,7 +34,7 @@ to get the live database and the admin area.
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API | |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | same page ("anon" / "publishable" key) | `NEXT_PUBLIC_SUPABASE_ANON_KEY` also works |
 | `BALLCHASING_TOKEN` | ballchasing.com → Upload tab → API token | server only |
-| `BALLCHASING_VISIBILITY` | optional: `public` / `unlisted` / `private` | default `unlisted` |
+| `BALLCHASING_VISIBILITY` | optional: `public` / `unlisted` / `private` | default `unlisted`. The site's "Watch in 3D" links need `unlisted` or `public` (not `private`). Only affects new uploads; redeploy after changing |
 | `ADMIN_EMAIL` | optional | extra gate: only this email can use `/admin` |
 
 No service-role key is needed: admin writes run as the signed-in admin and RLS checks them,
@@ -65,6 +65,9 @@ so there is no all-powerful key sitting on the server.
    player stats only, never points.
 
 ## Replays
+
+ballchasing limits uploads per account: a free account defaults to about **10 per rolling 24 hours** (raise it to 20 under ballchasing → profile →
+Upload Quota → Settings; the weekly cap is 70). A night with both teams can exceed that, so upload across two days if needed.
 
 Replay files only exist on **PC**: console players cannot export `.replay` files, so someone
 on PC on each team needs to save them (BakkesMod can auto-upload). Uploads go through our

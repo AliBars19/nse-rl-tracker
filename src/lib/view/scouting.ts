@@ -1,6 +1,6 @@
 import "server-only";
 import { replayCoverage } from "@/lib/engine/players";
-import { headToHead, meetingsWith, opponentList, patterns, theirSeason } from "@/lib/engine/scouting";
+import { headToHead, meetingsWith, opponentInsights, opponentList, patterns, theirSeason } from "@/lib/engine/scouting";
 import type { TeamPage } from "./team";
 
 export function buildScouting(p: TeamPage, oppSlug: string | null) {
@@ -20,6 +20,7 @@ export function buildScouting(p: TeamPage, oppSlug: string | null) {
       their: theirSeason(p.ctx, opp.id, p.team.id, p.teamSeason.tier, p.ds.season.isFinished),
       patterns: patterns(p.ctx, p.season, p.teamSeason.tier, opp.id, opponents),
       coverage,
+      insights: opponentInsights(p.ctx, selected.meetings, opp.id),
     },
   } as const;
 }

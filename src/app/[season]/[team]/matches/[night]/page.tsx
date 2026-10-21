@@ -24,7 +24,8 @@ export default async function NightPage({ params, searchParams }: PageProps<"/[s
     notFound();
   }
   const seriesId = typeof sp.series === "string" ? sp.series : null;
-  const v = buildMatches(p, night, seriesId);
+  const gameNo = typeof sp.game === "string" && /^\d{1,2}$/.test(sp.game) ? Number(sp.game) : null;
+  const v = buildMatches(p, night, seriesId, gameNo);
   if (!v) notFound();
   return <MatchesView p={p} v={v} tabs={tabs} current={night} isAdmin={viewer.isAdmin} />;
 }

@@ -139,6 +139,15 @@ export interface Game {
   processedAt: string | null;
 }
 
+/** A few extra ballchasing stats for one player in one game. Any can be missing (older replays, seed data). */
+export interface PlayerGameExtras {
+  bpm: number | null; // boost used per minute
+  avgSpeed: number | null;
+  percentSupersonic: number | null;
+  demosInflicted: number | null;
+  demosTaken: number | null;
+}
+
 export interface PlayerGameStat {
   gameId: string;
   playerId: string | null; // null when the name is not linked to a player yet
@@ -150,6 +159,8 @@ export interface PlayerGameStat {
   saves: number | null;
   shots: number | null;
   mvp: boolean | null;
+  /** Boost, speed and demo stats from the replay; absent when the replay did not carry them. */
+  extras?: PlayerGameExtras | null;
 }
 
 /** Admin-entered info about the next night, used by the Scenarios engine. */
