@@ -51,4 +51,8 @@ Things that went wrong once and how they were fixed, so nobody has to rediscover
   https://ballchasing.com/doc/api). They are pulled out with PostgREST JSON paths (`bpm:extra->boost->bpm`) in `loadGameExtras`, kept out of the main
   dataset query so a bad path cannot take the site down.
 - **ballchasing free accounts**: 10 uploads per rolling 24 h by default (20 max, 70 per week). See docs/setup.md.
+- **ballchasing's 3D viewer needs a sign-in for signed-out visitors** ("Sign in to generate these visualizations"; the viewer sits on "Loading…").
+  `#watch` does open the viewer tab, but the data is generated on demand. The site says so next to the button.
+- **Replay analysis beyond ballchasing**: the full replay can be parsed locally with `subtr-actor-py` (possession, boost, rotations, kickoffs, shots,
+  frame-by-frame positions); the `boxcars-py` on PyPI is too old for current replays. Boost there is on a 0–255 scale.
 

@@ -65,7 +65,7 @@ Treat as unconfirmed until NSE or Ali says so.
 **Per-game pages, scouting and extra stats (21 Oct 2026):**
 - *Matches*: every game box is clickable (`?series=<id>&game=N`) and shows that game's own scoreboard, with **Watch in 3D** (ballchasing's
   replay page on its viewer tab, `https://ballchasing.com/replay/<id>#watch`) and **Full stats on ballchasing** links. Only shown when the game has a
-  replay. The links work for *unlisted* and *public* replays, not *private* ones: keep `BALLCHASING_VISIBILITY` at `unlisted` (the default) or `public`
+  replay. ballchasing generates its 3D viewer data on demand and may ask visitors to sign in before the viewer loads (the link itself opens the right tab). The links work for *unlisted* and *public* replays, not *private* ones: keep `BALLCHASING_VISIBILITY` at `unlisted` (the default) or `public`
   in Vercel (a change only affects replays uploaded afterwards).
 - *Scouting*: "Their players vs City" (per-game goals, assists, saves, shots, score, plus top scorer and team averages) from replays of our meetings.
 - *Players*: boost/min, average speed, supersonic % and demos/game from the stats stored with each replay (`player_game_stats.extra`). They are read by a
