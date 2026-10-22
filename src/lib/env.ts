@@ -22,6 +22,22 @@ export function ballchasingToken(): string | undefined {
   return process.env.BALLCHASING_TOKEN || undefined;
 }
 
+export type Visibility = "public" | "unlisted" | "private";
+
+/**
+ * Turn what someone typed into Vercel into a value ballchasing accepts ('Public', ' public ' and '"public"'
+ * all mean public). Anything unrecognised, including empty, is 'unlisted' instead of an "invalid visibility" error.
+ */
+export function parseVisibility(raw: string | undefined): Visibility {
+  const v = (raw ?? "").trim().replace(/^["']+|["']+$/g, "").trim().toLowerCase();
+  return v === "public" || v === "unlisted" || v === "private" ? v : "unlisted";
+}
+
+/** Server only: how replays are uploaded to ballchasing (BALLCHASING_VISIBILITY, default unlisted). */
+export function ballchasingVisibility(): Visibility {
+  return parseVisibility(process.env.BALLCHASING_VISIBILITY);
+}
+
 /** Optional extra gate: when set, only this email can use /admin even if listed in `admins`. */
 export function adminEmail(): string | undefined {
   return process.env.ADMIN_EMAIL?.trim().toLowerCase() || undefined;

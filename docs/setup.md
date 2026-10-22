@@ -34,7 +34,7 @@ to get the live database and the admin area.
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API | |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | same page ("anon" / "publishable" key) | `NEXT_PUBLIC_SUPABASE_ANON_KEY` also works |
 | `BALLCHASING_TOKEN` | ballchasing.com → Upload tab → API token | server only |
-| `BALLCHASING_VISIBILITY` | optional: `public` / `unlisted` / `private` | default `unlisted`. The site's "Watch in 3D" links need `unlisted` or `public` (not `private`). Only affects new uploads; redeploy after changing |
+| `BALLCHASING_VISIBILITY` | optional: `public` / `unlisted` / `private` (case, spaces and quotes are ignored; anything else, or empty, means `unlisted`) | default `unlisted`. The site's "Watch in 3D" links need `unlisted` or `public` (not `private`). Only affects new uploads; redeploy after changing |
 | `ADMIN_EMAIL` | optional | extra gate: only this email can use `/admin` |
 
 No service-role key is needed: admin writes run as the signed-in admin and RLS checks them,

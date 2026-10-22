@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth";
+import { ballchasingVisibility } from "@/lib/env";
 import { BallchasingError, uploadReplay } from "@/lib/ballchasing/client";
 
 export const maxDuration = 60;
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
   const homeIsOurs = !!(series.teams as unknown as { our_key: string | null } | null)?.our_key;
 
   try {
-    const visibility = (process.env.BALLCHASING_VISIBILITY as "public" | "unlisted" | "private" | undefined) ?? "unlisted";
+    const visibility = ballchasingVisibility();
     const { id, duplicate } = await uploadReplay(file, file.name, visibility);
     const { ourColour } = meta.data;
     const homeColour = ourColour === "auto" ? null : homeIsOurs ? ourColour : ourColour === "blue" ? "orange" : "blue";

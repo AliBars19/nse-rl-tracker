@@ -9,7 +9,7 @@ import { ctxOf, ourTeam, seasonSeries } from "@/lib/engine/context";
 import { nightsForSeason } from "@/lib/engine/nights";
 import { scrimScore, scrimSeries } from "@/lib/engine/scrims";
 import { PLAYOFF_ROUND_NAMES } from "@/lib/engine/stats";
-import { ballchasingToken } from "@/lib/env";
+import { ballchasingToken, ballchasingVisibility } from "@/lib/env";
 import { dayDate } from "@/lib/view/dashboard";
 import { buildSorterTeams } from "@/lib/view/sorter";
 import { TEAM_KEYS } from "@/lib/view/team";
@@ -122,7 +122,7 @@ export default async function ReplaysAdmin({ searchParams }: PageProps<"/admin/r
         {body}
         <p className="m-0 text-xs text-muted">
           Replays only exist on PC: someone on each team needs to save them (or auto-upload with BakkesMod). Uploads
-          are {process.env.BALLCHASING_VISIBILITY ?? "unlisted"} on ballchasing.
+          are {ballchasingVisibility()} on ballchasing.
         </p>
       </AdminCard>
       <AdminCard title="Link players" id="link">
