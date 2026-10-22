@@ -55,4 +55,6 @@ Things that went wrong once and how they were fixed, so nobody has to rediscover
   `#watch` does open the viewer tab, but the data is generated on demand. The site says so next to the button.
 - **Replay analysis beyond ballchasing**: the full replay can be parsed locally with `subtr-actor-py` (possession, boost, rotations, kickoffs, shots,
   frame-by-frame positions); the `boxcars-py` on PyPI is too old for current replays. Boost there is on a 0–255 scale.
+- **A typo in `BALLCHASING_VISIBILITY` used to break every upload** ("invalid visibility" from ballchasing): the raw Vercel value was passed straight through and the
+  `?? "unlisted"` fallback only covers a missing variable. `parseVisibility()` in `src/lib/env.ts` now normalises it.
 
