@@ -57,4 +57,11 @@ Things that went wrong once and how they were fixed, so nobody has to rediscover
   frame-by-frame positions); the `boxcars-py` on PyPI is too old for current replays. Boost there is on a 0–255 scale.
 - **A typo in `BALLCHASING_VISIBILITY` used to break every upload** ("invalid visibility" from ballchasing): the raw Vercel value was passed straight through and the
   `?? "unlisted"` fallback only covers a missing variable. `parseVisibility()` in `src/lib/env.ts` now normalises it.
+- **ballchasing's public replay pages carry the team/player stat tables but not the timeline** (`Sign in to generate the game timeline`), and replay downloads need a login.
+  Quick write-ups can use the page tables; goal-by-goal needs the raw files from Ali. See docs/analysis.md. Link order on the site's Matches page is game order: don't `sort -u` the ids.
+- **ballchasing `Possession` and subtr-actor's possession differ**; kickoff "possession" is a parser label. Quote them as guidance, not as exact figures.
+- **ballchasing free quota** is about 10 uploads per rolling 24h (raise the setting to 20, 70 a week): a 11-game night needs two days.
+- **A Claude cloud session cannot read Vercel env vars, sign in as admin, or download from ballchasing**: Ali does uploads and sends zips; Claude reads the live site and ballchasing's public pages.
+- **Don't merge on a green-looking dashboard alone**: Vercel builds sometimes lag 7–12 minutes, and production deploys of merge commits sometimes need a manual `create_deployment` (gitSource github, ref main, target production).
+- **NSE rosters list the NSE nickname, not the in-game name**: matching opponents' in-game names against NSE team pages (Winter 26: 155 teams, Spring 26: 110 + 31 in Division 2) found nothing; ask for the replay or the player's name instead.
 

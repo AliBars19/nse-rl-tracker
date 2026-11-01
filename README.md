@@ -9,14 +9,14 @@ Rocket League teams in the NSE (National Student Esports) weekly tournament:
 Public to read; one admin (Ali) enters results and uploads replays. Built with Next.js 16
 (App Router), Supabase (Postgres + Auth + RLS) and the ballchasing.com API, hosted on Vercel.
 
-## Start here: current state (Winter 26, as of 21 Oct 2026)
+## Start here: current state (Winter 26, as of 1 Nov 2026)
 
 Read this first. It answers the questions that otherwise get re-asked every session.
 
 **Live site:** https://nse-rl-tracker.vercel.app (Vercel; every merge to `main` deploys).
-Winter 26 is **already created and current** (`/winter-26/champions`, `/winter-26/commanders`),
-with both rosters and two scrims entered (6 and 13 Oct). Both teams show "No results yet",
-because Week 1 has not been imported. Don't re-create the season.
+Winter 26 is **already created and current** (`/winter-26/champions`, `/winter-26/commanders`) with both rosters, two scrims and Stage 1
+results. Champions' and Commanders' Week 1 replays are uploaded, Champions' Week 2 (27 Oct) too. Don't re-create the season.
+**Stage 1 is over for Champions: 4 wins from 6 rounds, so Division 1.** Commanders are in Group 3 (10-point Swiss) per the sheet.
 
 **Where replays go:** upload them on **our own site**, not on ballchasing: sign in at `/admin` →
 *Replays* → **Sort and upload a night**. Drop every `.replay` file from the night (any names, any order,
@@ -50,12 +50,11 @@ night, 20 and 27 Oct), weeks 3–6 league (3, 10, 17, 24 Nov), week 7–8 playof
 5/6 Dec). Stage 2 splits teams into divisions; 2 are relegated and 2 promoted each week.
 155 teams signed up. Seeds: City Champions 9, City Commanders 44.
 
-**Qualification groups (inferred, not stated by NSE):** the sheet's groups look like win
-counts after Week 1. "Need N more wins for Div 1" fits 4 wins over the 6 qualification
-rounds for Div 1, and fewer goes to Swiss (Group 4–6 = 2 / 1 / 0 wins in Swiss).
-Treat as unconfirmed until NSE or Ali says so.
+**Qualification rule (confirmed by Ali and by the sheet's own headings):** 4 wins from the 6 Stage 1 rounds → Division 1; fewer → Swiss.
+The permanent standings sheet is https://docs.google.com/spreadsheets/d/1TQ7WzJ4a8Ku4Jl3hmpx9Kq5WERE3aV1euabSNfyo3To : tabs *Starting groups*, *After week 1*, *After week 2*
+(newest = current). It lists group membership only. After week 2: Group 1 = Division 1, Group 2 = Division 2, Groups 3–6 = Swiss starting on 10 / 8 / 6 / 4 points.
 
-**Week 1 (20 Oct) results:**
+**Week 1 (20 Oct) results** (Week 2 on 27 Oct: Champions W 3–0 Swansea Slotters, L 1–3 Southampton Saver Menu, bye → 4–2, Division 1):
 
 | Team | Round 1 | Round 2 | Round 3 | Group after |
 |---|---|---|---|---|
@@ -71,9 +70,11 @@ Treat as unconfirmed until NSE or Ali says so.
 - *Players*: boost/min, average speed, supersonic % and demos/game from the stats stored with each replay (`player_game_stats.extra`). They are read by a
   separate, guarded query (`loadGameExtras`), so if it ever fails the site still loads and they show "—".
 
+**Replay analysis** (Ali asks for write-ups after each night): method, scripts (`scripts/analysis/`) and findings so far are in **docs/analysis.md**.
+Claude can only run the deep version on raw `.replay` files Ali sends as a zip into the chat; without them it reads ballchasing's public replay pages.
+
 **What is not built yet** (see TODO.md): a Winter 26 ruleset in `src/lib/engine/rulesets.ts`
-(Stage 1 is a wins-based qualification, not the Spring points ladder), a "wins needed for
-Div 1" view for the Stage 1 dashboard, and the real-replay upload test.
+for league weeks 3–6 (once NSE publishes the divisions). Stage 1's "wins needed for Div 1" view is built.
 
 **Working rules for Claude sessions:** check the live site and `main` before proposing work.
 Don't ask Ali for things already in this README, docs/ or the repo.
@@ -107,7 +108,7 @@ admin area: see **[docs/setup.md](docs/setup.md)**.
 | `src/components/` | UI (design tokens live in `src/app/globals.css`) |
 | `supabase/migrations/` | Schema + RLS · `supabase/seed.sql` loads Spring 26 |
 | `seed-data/` | Raw sources: NSE match snapshots (`nse/*.json`) and standings sheet CSVs |
-| `scripts/` | `fetch-nse.ts` (snapshot NSE), `build-seed.ts` (sources → seed JSON + SQL) |
+| `scripts/` | `fetch-nse.ts` (snapshot NSE), `build-seed.ts` (sources → seed JSON + SQL), `analysis/` (Python replay-analysis tools, see docs/analysis.md) |
 | `design-reference/` | Approved mockups (see docs/HANDOFF.md §11 for how to read them) |
 
 ## Docs
@@ -116,6 +117,7 @@ admin area: see **[docs/setup.md](docs/setup.md)**.
 - [docs/points-engine.md](docs/points-engine.md): how nights are scored, derived stats, scenarios, known anomalies
 - [docs/data-model.md](docs/data-model.md): tables, why they look like this, RLS
 - [TODO.md](TODO.md): build checklist and **open questions for Ali**
+- [docs/analysis.md](docs/analysis.md): replay-analysis method, scripts and findings
 - [docs/lessons.md](docs/lessons.md): gotchas already hit (fonts, Tailwind layers, seasons, migrations, replays) and decisions made with Ali
 - [docs/HANDOFF.md](docs/HANDOFF.md): the original planning handoff
 
