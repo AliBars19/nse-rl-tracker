@@ -46,16 +46,19 @@ detail → players.
 
 ## Winter 26 (added 21 Oct 2026)
 - [x] Season created on the live site; rosters and two scrims entered
-- [ ] Import Week 1 / Stage 1 from NSE (Admin → Imports → NSE matches, page `stage-1`)
+- [x] Import Week 1 / Stage 1 from NSE (the replay sorter fetches it; Champions finished 4–2 → Division 1, Commanders in Swiss Group 3)
 - [x] Stage 1 qualification (4 wins of 6 rounds for Div 1, confirmed by Ali): dashboard card with wins needed and the six rounds
 - [ ] Winter 26 points ruleset for league weeks 3–6, once NSE publishes the divisions
-- [ ] Check `src/lib/import/sheet.ts` against the new "Week 1 Rocket Standings" layout before using the sheet import
+- [ ] Check `src/lib/import/sheet.ts` against the new "Week N Rocket Standings" layout (groups, "Qualified for division 1", Swiss 10/8/6/4 points) before using the sheet import; the permanent sheet is linked in the README
 - [x] Replay auto-sort: drop a whole night of replays, files are placed on series/games from their own headers (tested on 11 real Week 1 replays); fetches the night from NSE itself; lone/partial replays are placed from the lobby round and flagged as guesses
-- [ ] Try "Fetch results from NSE" on the live site (the database write path could only be tested against NSE, not the admin session)
-- [ ] First real replay upload through Admin → Replays → Sort and upload a night (token is set in Vercel Production; replays are in Ali's Linux `Demos` folder)
+- [x] "Fetch results from NSE" / sorter auto-fetch works on the live site (used for Weeks 1 and 2)
+- [x] Real replay uploads through Admin → Replays → Sort and upload a night (Champions Weeks 1–2, Commanders Week 1). ballchasing free quota is ~10 uploads / 24h: spread large batches over two days
 
 - [x] Per-game scoreboards + "Watch in 3D" links on Matches; "Their players vs City" on Scouting; boost/speed/demos on player profiles
-- [ ] Confirm "Watch in 3D" opens the viewer tab on a real uploaded replay, and that the extra-stats query works against the live database (written against ballchasing's documented field names, not yet run there)
+- [x] Extra-stats query works on the live database (boost/speed/demos show on player pages)
+- [ ] Confirm "Watch in 3D" opens the viewer tab for a signed-in ballchasing user (signed-out visitors may only get the stats page)
+- [ ] Commanders Week 2 (27 Oct) results/replays and a Commanders write-up; Champions' overtime shot split needs the raw 27 Oct replays (docs/analysis.md)
+- [ ] Stage 2: import divisions and decide the Winter 26 ruleset once NSE publishes them (weeks 3–6 from 3 Nov)
 
 ## Open questions for Ali
 
@@ -65,7 +68,7 @@ Answered from NSE data during the build (please confirm):
 - **Caprillix** leads both teams. Is that you? (Player pages are public right now.)
 - **Division 1 ladder**: 10/7/6/4/3/0 in Week 3, then two groups: upper 15/12/11/9/8/6, lower 8/6/5/3/2/0.
 - **Swiss ladder**: not a simple path ladder (2 wins scored 8 or 7, and so on), so Swiss points come
-  from the sheet and Scenarios are hidden for Commanders. Do you know the Swiss rules?
+  from the sheet and Scenarios are hidden for Commanders. Do you know the Swiss rules? (Winter 26 sheet: Swiss groups start on 10 / 8 / 6 / 4 points.)
 - **Week 3 bye**: modelled as a Round 3 series with no opponent (the recommended option). Week 6 had byes too.
 - **Sheet anomalies**: Fake Warwick (Wk 4), Swansea (Wk 5) and Lincoln (Wk 6) lost Round 3 from 1–1 but
   got 6, not 4. NSE adjustments?

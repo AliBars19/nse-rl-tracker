@@ -3,7 +3,7 @@
 # City RL Tracker: notes for Claude
 
 - Owner: Ali (team captain). Explain the approach before each phase; keep TODO.md and docs/ current.
-- Read docs/HANDOFF.md for decisions and the design spec; docs/points-engine.md and docs/data-model.md for the logic.
+- Read docs/HANDOFF.md for decisions and the design spec; docs/points-engine.md and docs/data-model.md for the logic; docs/analysis.md for replay write-ups (method, scripts/analysis/, findings).
 - Engines in `src/lib/engine` are pure and tested. Change them test-first (`npm test`).
 - Never invent stats: missing replay data shows dashed "—" placeholders.
 - Copy rule: never "win the 1–0 match" / "the 2–0 match". Use "Winners' match", "Round 3", "Win all three", …
