@@ -55,6 +55,16 @@ R5: all four games went to overtime (W 2–1, L 3–4, L 2–3, L 2–3). Even o
 **Player 17** scored 8 of their 11 goals from 13 shots. City converted 21% to their 28%. In the three losses Southampton collected more boost and more big pads.
 Not answerable without the raw files: shots/saves in overtime only, how each overtime goal happened.
 
+**Commanders, Week 3 (3 Nov), R3 L 0–3 vs Herts RL Team 1 (games L 1–4, L 1–2, L 3–4 in overtime).** Raw files, so goal-by-goal (City were blue).
+- Not a kickoff or boost-collection problem this time: City had first touch 14 of 17, kickoff possession 11–5 (the opposite of Week 1), and out-collected boost in all three games, and out-demoed Herts 20–12.
+- It was last-man boost: **8 of Herts' 10 goals came with City's last defender on 20% boost or less** (0% on three of them). SafRL spent about 23% of each game at 0 boost, Herts' players 3–21%.
+  City were at 0 boost for 125 / 172 / 247s a game against Herts' 98 / 104 / 156s.
+- G3 was a blown 3–0 lead (goals in the first ~2:25 from SafRL, Junxi, Wasil): Herts' Spoooder-_-Man then scored twice in five seconds (a counter off a lone defender, then a scramble with all three City players in the goal area and the ball sitting in the corner),
+  steaxzy. equalised on a counter with SafRL last man on 0%, and Spoooder won it about 2:15 into overtime from another scramble in front of City's net (Wasil on 0%, Junxi on 4%). In overtime Herts had 8 shots to City's 2.
+- G2: Herts scored 8 seconds after the opening kickoff on a counter-attack (SafRL last man on 0%) and again at 3:10 with Junxi last man on 3%; City's goal came between.
+- G1: Herts scored three in under a minute (2:00, 2:08, 2:49) after City had five shots in the opening minute without scoring.
+- Herts' 10 goals: 4 sustained pressure, 3 counter-attacks, 3 other. Spoooder-_-Man scored 5 of them, steaxzy. 3, CYBRDRAG0N 2.
+
 ## Standings sheet ("Week N Rocket Standings")
 
 https://docs.google.com/spreadsheets/d/1TQ7WzJ4a8Ku4Jl3hmpx9Kq5WERE3aV1euabSNfyo3To is the season's permanent sheet; the newest tab is the
