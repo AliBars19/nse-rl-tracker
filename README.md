@@ -9,7 +9,7 @@ Rocket League teams in the NSE (National Student Esports) weekly tournament:
 Public to read; one admin (Ali) enters results and uploads replays. Built with Next.js 16
 (App Router), Supabase (Postgres + Auth + RLS) and the ballchasing.com API, hosted on Vercel.
 
-## Start here: current state (Winter 26, as of 1 Nov 2026)
+## Start here: current state (Winter 26, as of 5 Nov 2026)
 
 Read this first. It answers the questions that otherwise get re-asked every session.
 
@@ -17,6 +17,9 @@ Read this first. It answers the questions that otherwise get re-asked every sess
 Winter 26 is **already created and current** (`/winter-26/champions`, `/winter-26/commanders`) with both rosters, two scrims and Stage 1
 results. Champions' and Commanders' Week 1 replays are uploaded, Champions' Week 2 (27 Oct) too. Don't re-create the season.
 **Stage 1 is over for Champions: 4 wins from 6 rounds, so Division 1.** Commanders are in Group 3 (10-point Swiss) per the sheet.
+**League week 3 (3 Nov)** is in three NSE tournaments (Division 1, Division 2, Swiss). Champions: Division 1, L 2–3 Manchester Pookie Pies, L 1–3 Diff Diddlers, W 3–2 UWE Sea Stags RL.
+Commanders: Swiss, W 3–0 Swansea Slotters, W 3–1 bingo lingo, L 0–3 Herts RL Team 1. NSE has not published league points: Division 1 and 2 tables are calculated
+from results with Spring's ladders (marked on the page), the Swiss has no points. A City team that changes division is moved automatically when its week is imported.
 
 **Where replays go:** upload them on **our own site**, not on ballchasing: sign in at `/admin` →
 *Replays* → **Sort and upload a night**. Drop every `.replay` file from the night (any names, any order,
@@ -73,8 +76,7 @@ The permanent standings sheet is https://docs.google.com/spreadsheets/d/1TQ7WzJ4
 **Replay analysis** (Ali asks for write-ups after each night): method, scripts (`scripts/analysis/`) and findings so far are in **docs/analysis.md**.
 Claude can only run the deep version on raw `.replay` files Ali sends as a zip into the chat; without them it reads ballchasing's public replay pages.
 
-**What is not built yet** (see TODO.md): a Winter 26 ruleset in `src/lib/engine/rulesets.ts`
-for league weeks 3–6 (once NSE publishes the divisions). Stage 1's "wins needed for Div 1" view is built.
+**Not known yet** (see TODO.md): NSE's actual Winter 26 weekly points, the Swiss ladder, and the tiebreaks.
 
 **Working rules for Claude sessions:** check the live site and `main` before proposing work.
 Don't ask Ali for things already in this README, docs/ or the repo.

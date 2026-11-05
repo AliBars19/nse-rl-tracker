@@ -24,7 +24,7 @@ export function Hero({ v, switcher }: { v: DashboardView; switcher: React.ReactN
       </div>
       <div className="grid grid-cols-2 gap-2 lg:flex lg:gap-3">
         <div className="flex flex-col gap-1 border border-line bg-panel p-4 lg:w-[180px] lg:gap-[6px] lg:px-6 lg:py-5">
-          <span className="text-[11px] tracking-[0.16em] text-muted lg:text-xs">FINAL RANK</span>
+          <span className="text-[11px] tracking-[0.16em] text-muted lg:text-xs">{hero.finished ? "FINAL RANK" : "RANK NOW"}</span>
           <span className="font-display text-5xl font-bold leading-none lg:text-[64px]">
             {hero.rank ?? "—"}
             {hero.field && <span className="text-lg text-muted lg:text-2xl">/{hero.field}</span>}
@@ -36,8 +36,8 @@ export function Hero({ v, switcher }: { v: DashboardView; switcher: React.ReactN
             <span className="hidden lg:inline">SEASON POINTS</span>
           </span>
           <span className="font-display text-5xl font-bold leading-none lg:text-[64px]">
-            {hero.points}
-            <span className="hidden text-xl font-semibold lg:inline"> pts</span>
+            {hero.points ?? "—"}
+            {hero.points !== null && <span className="hidden text-xl font-semibold lg:inline"> pts</span>}
           </span>
         </div>
       </div>
@@ -332,7 +332,7 @@ export function Scenarios({ s }: { s: ScenarioPreview }) {
         <div className="flex items-center gap-[14px]">
           <h2 id="scenarios" className="h-section">Scenarios</h2>
           <Tag>{s.weekLabel} PREVIEW</Tag>
-          {s.archived && <span className="text-xs text-muted">Season over: this is how {s.weekLabel.toLowerCase().replace("week", "Week")} looked going in</span>}
+          {s.archived && <span className="text-xs text-muted">{s.seasonOver ? "Season over: this" : "Add next week's opponent on the Upcoming page for a live preview. This"} is how {s.weekLabel.toLowerCase().replace("week", "Week")} looked going in</span>}
         </div>
         <span className="text-sm text-text-3">
           {going}
@@ -405,7 +405,7 @@ export function ScenariosPhone({ s }: { s: ScenarioPreview }) {
         </div>
         <span className="text-xs text-muted">
           Going in: {s.scenarios.goingIn.text}
-          {s.archived && " · season over"}
+          {s.archived && (s.seasonOver ? " · season over" : " · last night")}
         </span>
       </div>
       <div className="mx-4 my-[14px] border border-highlight-line bg-highlight px-[14px] py-3 text-sm leading-[1.45]">
@@ -440,7 +440,7 @@ export function Standings({ v, limit, fullHref, className = "hidden lg:block" }:
   const cols = `64px minmax(0,1fr) repeat(${t.weeks.length}, 80px) 100px${hasPlayoffs ? " 150px" : ""}`;
   return (
     <Panel aria-labelledby="standings" className={className}>
-      <PanelHeader id="standings" title={`${v.tierName} standings`} right={<span className="text-[13px] text-muted">Promoted / relegated teams shown as —</span>} />
+      <PanelHeader id="standings" title={`${v.tierName} standings`} right={<span className="text-[13px] text-muted">{t.derived ? "Calculated from NSE results, not NSE's own table" : "Promoted / relegated teams shown as —"}</span>} />
       <div className="overflow-x-auto" tabIndex={0} aria-label={`${v.tierName} standings, scrolls sideways`}>
       <div role="table" aria-label={`${v.tierName} standings`} className="min-w-[720px]">
         <div role="row" className="grid border-b border-line px-6 py-3 text-xs tracking-[0.14em] text-muted" style={{ gridTemplateColumns: cols }}>

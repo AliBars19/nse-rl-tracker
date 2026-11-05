@@ -81,9 +81,10 @@ export function ReplaySorter({ teams }: { teams: SorterTeam[] }) {
       }),
     );
     const all = [...rows, ...fresh];
-    // Replays from a night we have no results for yet: fetch them from NSE ourselves.
+    // Replays from a night we have no results for yet, for either City team: fetch them from NSE ourselves.
+    // (Champions can be in Division 1 while Commanders are in the Swiss, so one team having the night is not enough.)
     let known = teamList;
-    const missing = daysOf(all).filter((d) => !asked.current.has(d) && !known.some((t) => t.series.some((x) => x.date === d)));
+    const missing = daysOf(all).filter((d) => !asked.current.has(d) && (!known.length || known.some((t) => !t.series.some((x) => x.date === d))));
     if (missing.length) known = await sync(missing, known);
     const next = resort(all, forced, known);
     setDetected(next.detected);

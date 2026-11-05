@@ -48,7 +48,10 @@ export interface DashboardView {
     phoneSummary: string;
     rank: number | null;
     field: number | null;
-    points: number;
+    /** null when NSE's points for this tier are not known yet (Winter 26 Swiss). */
+    points: number | null;
+    /** The season is over: the rank is final, otherwise it is where the team stands now. */
+    finished: boolean;
   };
   tiles: Array<{ label: string; phoneLabel: string; value: string; note: string; phoneNote: string }>;
   weeks: WeekRow[];
@@ -81,7 +84,7 @@ export function buildDashboard(p: TeamPage): DashboardView {
   const finished = ds.season.isFinished;
   const field = table.rows.length || null;
   const rank = ours?.position ?? null;
-  const points = ours?.total ?? stats.nights.total;
+  const points = ours ? ours.total : nights.some((n) => n.points !== null) ? stats.nights.total : null;
   const tierName = TIER_NAMES[teamSeason.tier].long;
 
   const place = rank ? `${finished ? "Finished" : "Currently"} ${ordinal(rank)} of ${field}` : null;
@@ -183,7 +186,7 @@ export function buildDashboard(p: TeamPage): DashboardView {
   }));
 
   return {
-    hero: { name: team.name, summary, phoneSummary, rank, field, points },
+    hero: { name: team.name, summary, phoneSummary, rank, field, points, finished },
     tiles,
     weeks,
     chart: { max: maxPts, caption: ruleset.ladder ? `Max ${maxPts} per night` : "Points from the NSE sheet" },

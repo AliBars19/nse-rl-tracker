@@ -64,4 +64,6 @@ Things that went wrong once and how they were fixed, so nobody has to rediscover
 - **A Claude cloud session cannot read Vercel env vars, sign in as admin, or download from ballchasing**: Ali does uploads and sends zips; Claude reads the live site and ballchasing's public pages.
 - **Don't merge on a green-looking dashboard alone**: Vercel builds sometimes lag 7–12 minutes, and production deploys of merge commits sometimes need a manual `create_deployment` (gitSource github, ref main, target production).
 - **NSE rosters list the NSE nickname, not the in-game name**: matching opponents' in-game names against NSE team pages (Winter 26: 155 teams, Spring 26: 110 + 31 in Division 2) found nothing; ask for the replay or the player's name instead.
+- **A City team can be in a different NSE tournament each week** (Winter 26: Champions in Division 1, Commanders in the Swiss, both on Tuesday 3 Nov). The replay sorter used to look only in the tournament stored for each team and called a day "known" if either team had a series that night, so Champions' replays were "not detected". It now looks in every tournament of the season and fetches a night when either team is missing it.
+- **NSE's Stage 1 page (`/stage-1`) answers 403 once Stage 1 is over**: import what you need while it is live (the fixture in `seed-data/nse` is night 1 only).
 

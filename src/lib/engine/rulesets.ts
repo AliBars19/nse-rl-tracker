@@ -47,6 +47,16 @@ export const DIV2_LADDER: Ladder = {
   "0-2:L": 0,
 };
 
+/** Spring 26 Division 1, Week 3 (before the division split into two groups). */
+export const DIV1_LADDER: Ladder = {
+  "2-0:W": 10,
+  "2-0:L": 7,
+  "1-1:W": 6,
+  "1-1:L": 4,
+  "0-2:W": 3,
+  "0-2:L": 0,
+};
+
 const RULESETS: Ruleset[] = [
   {
     seasonSlug: "spring-26",
@@ -88,6 +98,50 @@ const RULESETS: Ruleset[] = [
     playoffLines: null,
   },
 ];
+
+RULESETS.push(
+  {
+    seasonSlug: "winter-26",
+    tier: "div1",
+    status: "derived",
+    note:
+      "NSE has not published Winter 26 points. Division 1 uses Spring 26's Week 3 ladder (10/7/6/4/3/0), and the " +
+      "table is calculated from NSE results, so it can differ from NSE's own. Four teams lose a relegation match " +
+      "each week but only two go down, so \"relegated\" here means at risk.",
+    ladder: DIV1_LADDER,
+    promotesTo: null,
+    relegatesTo: "div2",
+    roundStyle: "bracket",
+    playoffLines: null,
+  },
+  {
+    seasonSlug: "winter-26",
+    tier: "div2",
+    status: "derived",
+    note:
+      "NSE has not published Winter 26 points. Division 2 uses Spring 26's verified ladder (10/7/6/4/2/0), and the " +
+      "table is calculated from NSE results, so it can differ from NSE's own. Four teams win a promotion match " +
+      "each week but only two go up, so \"promoted\" here means in line for it.",
+    ladder: DIV2_LADDER,
+    promotesTo: "div1",
+    relegatesTo: "swiss",
+    roundStyle: "bracket",
+    playoffLines: null,
+  },
+  {
+    seasonSlug: "winter-26",
+    tier: "swiss",
+    status: "unknown",
+    note:
+      "Winter 26 Swiss points are not published and not known: Swiss groups start on 10 / 8 / 6 / 4 points after Stage 1, " +
+      "but the weekly ladder is unconfirmed. The site shows rounds and records only until the NSE sheet has a week tab.",
+    ladder: null,
+    promotesTo: "div2",
+    relegatesTo: null,
+    roundStyle: "swiss",
+    playoffLines: null,
+  },
+);
 
 export function getRuleset(seasonSlug: string, tier: Tier): Ruleset {
   const found = RULESETS.find((r) => r.seasonSlug === seasonSlug && r.tier === tier);

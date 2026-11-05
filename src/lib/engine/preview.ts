@@ -14,6 +14,8 @@ export interface ScenarioPreview {
   week: number;
   weekLabel: string; // 'WEEK 6'
   archived: boolean;
+  /** The season is finished (otherwise an archived preview is just last night's, until the next one is added). */
+  seasonOver: boolean;
   r1Opponent: string | null;
   scenarios: Scenarios;
 }
@@ -30,7 +32,7 @@ export function scenarioPreview(ctx: Ctx, teamId: string, tier: Tier): ScenarioP
     const r1 = ctx.teamOrNull(upcoming.r1OpponentId);
     const scenarios = buildScenarios({ ruleset, table: rows, ourTeamId: teamId, r1Opponent: r1?.shortName ?? null });
     return scenarios
-      ? { week: upcoming.week, weekLabel: `WEEK ${upcoming.week}`, archived: false, r1Opponent: r1?.shortName ?? null, scenarios }
+      ? { week: upcoming.week, weekLabel: `WEEK ${upcoming.week}`, archived: false, seasonOver: false, r1Opponent: r1?.shortName ?? null, scenarios }
       : null;
   }
 
@@ -50,6 +52,6 @@ export function scenarioPreview(ctx: Ctx, teamId: string, tier: Tier): ScenarioP
   const r1Opponent = last.rounds.find((r) => r.round === 1)?.ts.opponent?.shortName ?? null;
   const scenarios = buildScenarios({ ruleset, table: rows, ourTeamId: teamId, r1Opponent });
   return scenarios
-    ? { week: last.night.week, weekLabel: `WEEK ${last.night.week}`, archived: true, r1Opponent, scenarios }
+    ? { week: last.night.week, weekLabel: `WEEK ${last.night.week}`, archived: true, seasonOver: ctx.ds.season.isFinished, r1Opponent, scenarios }
     : null;
 }

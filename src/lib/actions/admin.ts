@@ -8,6 +8,7 @@ import type { Dataset, Tier } from "@/lib/domain/types";
 import { defaultShortName, nameKey } from "@/lib/import/names";
 import { londonTimeToIso, nseDateToIso, parseNseMatchTable, tournamentSlugFrom, type NseTeamRef } from "@/lib/import/nse";
 import { rowToSeries } from "@/lib/import/nse-series";
+import { nightPageTargets, tierAfterImport } from "@/lib/import/tournaments";
 import { parseStandingsSheet, sheetCsvUrl, SPRING_26_LAYOUTS } from "@/lib/import/sheet";
 import { buildSorterTeams, type SorterTeam } from "@/lib/view/sorter";
 
@@ -651,8 +652,38 @@ export async function applyNse(input: z.infer<typeof NseZ>): Promise<ActionResul
       }));
     const { error } = await db.from("series").upsert(payload, { onConflict: "nse_match_id" });
     if (error) throw error;
+
+    // City teams move between divisions week to week: track each one in the tier (and tournament) it
+    // just played in, unless it has already played a later week elsewhere.
+    const moved: string[] = [];
+    if (!isTeamPage && stage === "league") {
+      for (const key of ["champions", "commanders"] as const) {
+        const o = ourTeamOrThrow(ds, key);
+        const played = rows.some((r) => r.home.slug === o.team.nseSlug || r.away.slug === o.team.nseSlug);
+        if (!played) continue;
+        const latest = Math.max(
+          0,
+          ...ds.nights
+            .filter((n) => n.stage === "league")
+            .filter((n) => (ds.series ?? []).some((s) => s.nightId === n.id && (s.homeTeamId === o.team.id || s.awayTeamId === o.team.id)))
+            .map((n) => n.week),
+        );
+        if (!tierAfterImport(data.week, latest)) continue;
+        if (o.teamSeason.tier === data.tier && o.teamSeason.nseTournamentSlug === data.tournament) continue;
+        const { error: moveError } = await db
+          .from("team_seasons")
+          .update({ tier: data.tier, nse_tournament_slug: data.tournament })
+          .eq("season_id", ds.season.id)
+          .eq("team_id", o.team.id);
+        if (moveError) throw moveError;
+        moved.push(`${o.team.name} → ${data.tier}`);
+      }
+    }
     refreshSite();
-    return { ok: true, message: `Imported ${payload.length} series${night ? ` into ${night.label}` : ""}.` };
+    return {
+      ok: true,
+      message: `Imported ${payload.length} series${night ? ` into ${night.label}` : ""}.${moved.length ? ` Moved ${moved.join(", ")}.` : ""}`,
+    };
   } catch (e) {
     return fail(e);
   }
@@ -662,13 +693,12 @@ export async function applyNse(input: z.infer<typeof NseZ>): Promise<ActionResul
 
 const SyncZ = z.object({ dates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).min(1).max(14) });
 
-/** The NSE pages a season is spread over, in the order they happen. Playoffs have no such page. */
-const NSE_NIGHT_PAGES = ["stage-1", "week-3", "week-4", "week-5", "week-6"] as const;
-
 /**
  * The replay sorter needs the night's series in the database. Given the days the dropped replays
- * were played, fetch whichever NSE pages cover them (for each City team's tournament) and import
- * them with the same code as Imports → NSE matches. Returns the refreshed series for the sorter.
+ * were played, look through every tournament of the season (Swiss, Division 1, Division 2: a City team
+ * can be in any of them from one week to the next) for the pages that cover those days and hold a
+ * City match, and import them with the same code as Imports → NSE matches. That import also moves a
+ * City team to the division it just played in. Returns the refreshed series for the sorter.
  */
 export async function syncNseForDates(input: z.infer<typeof SyncZ>): Promise<ActionResult<SorterTeam[]>> {
   try {
@@ -676,35 +706,35 @@ export async function syncNseForDates(input: z.infer<typeof SyncZ>): Promise<Act
     const { ds } = await adminDataset();
     if (!ds) throw new Error("No current season. Create one on the admin overview first.");
     const wanted = new Set(dates);
-    const targets = new Map<string, { tier: Tier; tournament: string }>();
     const ours = (["champions", "commanders"] as const).map((key) => ourTeamOrThrow(ds, key));
-    for (const o of ours) {
-      // A team with no slug of its own can share the other team's when both are in the same tier.
-      const sibling = ours.find((x) => x !== o && x.teamSeason.tier === o.teamSeason.tier && x.teamSeason.nseTournamentSlug);
-      const tournament = o.teamSeason.nseTournamentSlug ?? sibling?.teamSeason.nseTournamentSlug;
-      if (!tournament) throw new Error(`${o.team.name} has no NSE tournament set for ${ds.season.name}. Set it under Admin → Overview → NSE tournaments.`);
-      targets.set(`${tournament}|${o.teamSeason.tier}`, { tier: o.teamSeason.tier, tournament });
-    }
+    const citySlugs = new Set(ours.map((o) => o.team.nseSlug).filter((x): x is string => !!x));
+    // Tournaments the season is known to use, plus whatever each City team is currently recorded in.
+    const recorded = ours.flatMap((o) => (o.teamSeason.nseTournamentSlug ? [{ tier: o.teamSeason.tier, tournament: o.teamSeason.nseTournamentSlug }] : []));
+    const targets = nightPageTargets(ds.season.slug, recorded);
+    if (!targets.length) throw new Error(`No NSE tournament is set for ${ds.season.name}. Set it under Admin → Overview → NSE tournaments.`);
+
     const done: string[] = [];
-    for (const { tier, tournament } of targets.values()) {
-      const left = new Set(wanted);
-      for (const page of NSE_NIGHT_PAGES) {
-        if (!left.size) break;
-        let rowDates: string[];
-        try {
-          rowDates = (await fetchNse(tournament, page)).map((r) => nseDateToIso(r.date));
-        } catch {
-          continue; // not published yet (or this tournament has no such page)
-        }
-        const hit = rowDates.filter((d) => left.has(d));
-        if (!hit.length) continue;
-        const week = page === "stage-1" ? 1 : Number(page.slice(5));
-        const r = await applyNse({ tier, tournament, page, week });
-        if (!r.ok) throw new Error(`${tournament}/${page}: ${r.error}`);
-        hit.forEach((d) => left.delete(d));
-        done.push(`${tournament}/${page}`);
-        await new Promise((res) => setTimeout(res, 300)); // be polite to NSE
+    // Dates still to find, per tournament: Champions can be in Division 1 while Commanders are in the Swiss on the same night.
+    const remaining = new Map<string, Set<string>>();
+    for (const target of targets) {
+      const left = remaining.get(target.tournament) ?? new Set(wanted);
+      remaining.set(target.tournament, left);
+      if (!left.size) continue;
+      let rows;
+      try {
+        rows = await fetchNse(target.tournament, target.page);
+      } catch {
+        continue; // not published yet (or this tournament has no such page)
       }
+      const hit = rows.map((r) => nseDateToIso(r.date)).filter((d) => left.has(d));
+      if (!hit.length) continue;
+      // Only the tournaments a City team is in matter (Division 2 is skipped while neither team plays there).
+      if (citySlugs.size && !rows.some((r) => (r.home.slug && citySlugs.has(r.home.slug)) || (r.away.slug && citySlugs.has(r.away.slug)))) continue;
+      const r = await applyNse({ tier: target.tier, tournament: target.tournament, page: target.page, week: target.week });
+      if (!r.ok) throw new Error(`${target.tournament}/${target.page}: ${r.error}`);
+      hit.forEach((d) => left.delete(d));
+      done.push(`${target.tournament}/${target.page}`);
+      await new Promise((res) => setTimeout(res, 300)); // be polite to NSE
     }
     const fresh = await adminDataset();
     const teams = fresh.ds ? buildSorterTeams(fresh.ds) : [];
