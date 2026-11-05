@@ -6,7 +6,8 @@ import { z } from "zod";
 import { adminDataset, ourTeamOrThrow, uniqueSlug } from "@/lib/data/admin";
 import type { Dataset, Tier } from "@/lib/domain/types";
 import { defaultShortName, nameKey } from "@/lib/import/names";
-import { londonTimeToIso, nseDateToIso, parseNseMatchTable, tournamentSlugFrom, type NseTeamRef } from "@/lib/import/nse";
+import { londonTimeToIso, nseDateToIso, parseNseMatchTable, parseNsePointsSections, tournamentSlugFrom, type NseTeamRef } from "@/lib/import/nse";
+import { pointsCells } from "@/lib/import/nse-points";
 import { rowToSeries } from "@/lib/import/nse-series";
 import { nightPageTargets, tierAfterImport } from "@/lib/import/tournaments";
 import { parseStandingsSheet, sheetCsvUrl, SPRING_26_LAYOUTS } from "@/lib/import/sheet";
@@ -523,13 +524,18 @@ export interface NsePreview {
   date: string | null;
 }
 
-async function fetchNse(tournament: string, page: string) {
+async function fetchNsePage(tournament: string, page: string) {
   const url = `https://tournaments.nse.gg/tournaments/${tournament}/${page}`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`NSE returned ${res.status} for ${url}`);
-  const rows = parseNseMatchTable(await res.text());
+  const html = await res.text();
+  const rows = parseNseMatchTable(html);
   if (!rows.length) throw new Error("No match rows found on that page (is it rendered with JavaScript?)");
-  return rows;
+  return { rows, points: parseNsePointsSections(html) };
+}
+
+async function fetchNse(tournament: string, page: string) {
+  return (await fetchNsePage(tournament, page)).rows;
 }
 
 export async function previewNse(input: z.infer<typeof NseZ>): Promise<ActionResult<NsePreview>> {
@@ -580,7 +586,7 @@ export async function applyNse(input: z.infer<typeof NseZ>): Promise<ActionResul
     const data = NseZ.parse(input);
     const { db, ds } = await adminDataset();
     if (!ds) throw new Error("No current season");
-    const rows = await fetchNse(data.tournament, data.page);
+    const { rows, points: pointsSections } = await fetchNsePage(data.tournament, data.page);
     const isTeamPage = data.page.startsWith("teams/");
     const stage = data.page === "stage-1" ? "placement" : "league";
 
@@ -653,6 +659,17 @@ export async function applyNse(input: z.infer<typeof NseZ>): Promise<ActionResul
     const { error } = await db.from("series").upsert(payload, { onConflict: "nse_match_id" });
     if (error) throw error;
 
+    // The week's official points, from the headings of NSE's "Points" round (the only place NSE publishes them).
+    let pointsSaved = 0;
+    if (night && stage === "league" && !isTeamPage) {
+      const cells = pointsCells(pointsSections, night.id, (ref) => (ref.slug ? teamIds.get(ref.slug) : undefined));
+      if (cells.length) {
+        const { error: ptsError } = await db.from("external_night_results").upsert(cells, { onConflict: "night_id,team_id" });
+        if (ptsError) throw ptsError;
+        pointsSaved = cells.length;
+      }
+    }
+
     // City teams move between divisions week to week: track each one in the tier (and tournament) it
     // just played in, unless it has already played a later week elsewhere.
     const moved: string[] = [];
@@ -682,7 +699,7 @@ export async function applyNse(input: z.infer<typeof NseZ>): Promise<ActionResul
     refreshSite();
     return {
       ok: true,
-      message: `Imported ${payload.length} series${night ? ` into ${night.label}` : ""}.${moved.length ? ` Moved ${moved.join(", ")}.` : ""}`,
+      message: `Imported ${payload.length} series${night ? ` into ${night.label}` : ""}${pointsSaved ? ` and ${pointsSaved} teams' points` : ""}.${moved.length ? ` Moved ${moved.join(", ")}.` : ""}`,
     };
   } catch (e) {
     return fail(e);
@@ -702,10 +719,27 @@ const SyncZ = z.object({ dates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/))
  */
 export async function syncNseForDates(input: z.infer<typeof SyncZ>): Promise<ActionResult<SorterTeam[]>> {
   try {
-    const { dates } = SyncZ.parse(input);
+    return await syncNse(SyncZ.parse(input).dates);
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** Every published page of the season that a City team plays in (all weeks, all divisions): Admin → Overview → Update from NSE. */
+export async function updateFromNse(): Promise<ActionResult> {
+  try {
+    const r = await syncNse(null);
+    return r.ok ? { ok: true, message: r.message } : r;
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+async function syncNse(dates: string[] | null): Promise<ActionResult<SorterTeam[]>> {
+  try {
     const { ds } = await adminDataset();
     if (!ds) throw new Error("No current season. Create one on the admin overview first.");
-    const wanted = new Set(dates);
+    const wanted = dates ? new Set(dates) : null;
     const ours = (["champions", "commanders"] as const).map((key) => ourTeamOrThrow(ds, key));
     const citySlugs = new Set(ours.map((o) => o.team.nseSlug).filter((x): x is string => !!x));
     // Tournaments the season is known to use, plus whatever each City team is currently recorded in.
@@ -717,16 +751,16 @@ export async function syncNseForDates(input: z.infer<typeof SyncZ>): Promise<Act
     // Dates still to find, per tournament: Champions can be in Division 1 while Commanders are in the Swiss on the same night.
     const remaining = new Map<string, Set<string>>();
     for (const target of targets) {
-      const left = remaining.get(target.tournament) ?? new Set(wanted);
+      const left = remaining.get(target.tournament) ?? new Set(wanted ?? []);
       remaining.set(target.tournament, left);
-      if (!left.size) continue;
+      if (wanted && !left.size) continue;
       let rows;
       try {
         rows = await fetchNse(target.tournament, target.page);
       } catch {
         continue; // not published yet (or this tournament has no such page)
       }
-      const hit = rows.map((r) => nseDateToIso(r.date)).filter((d) => left.has(d));
+      const hit = rows.map((r) => nseDateToIso(r.date)).filter((d) => !wanted || left.has(d));
       if (!hit.length) continue;
       // Only the tournaments a City team is in matter (Division 2 is skipped while neither team plays there).
       if (citySlugs.size && !rows.some((r) => (r.home.slug && citySlugs.has(r.home.slug)) || (r.away.slug && citySlugs.has(r.away.slug)))) continue;
@@ -740,7 +774,7 @@ export async function syncNseForDates(input: z.infer<typeof SyncZ>): Promise<Act
     const teams = fresh.ds ? buildSorterTeams(fresh.ds) : [];
     return {
       ok: true,
-      message: done.length ? `Imported ${done.join(", ")} from NSE.` : "NSE has no results for those days yet.",
+      message: done.length ? `Imported ${done.join(", ")} from NSE.` : wanted ? "NSE has no results for those days yet." : "NSE has no published pages with a City team yet.",
       data: teams,
     };
   } catch (e) {

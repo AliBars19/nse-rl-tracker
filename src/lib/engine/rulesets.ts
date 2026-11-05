@@ -103,11 +103,10 @@ RULESETS.push(
   {
     seasonSlug: "winter-26",
     tier: "div1",
-    status: "derived",
+    status: "verified",
     note:
-      "NSE has not published Winter 26 points. Division 1 uses Spring 26's Week 3 ladder (10/7/6/4/3/0), and the " +
-      "table is calculated from NSE results, so it can differ from NSE's own. Four teams lose a relegation match " +
-      "each week but only two go down, so \"relegated\" here means at risk.",
+      "Checked against every Division 1 team in Week 3: NSE's Points round gives 10 / 7 / 6 / 4 / 3 points by path and sends the " +
+      "four teams that lose a relegation match down to Division 2.",
     ladder: DIV1_LADDER,
     promotesTo: null,
     relegatesTo: "div2",
@@ -119,10 +118,10 @@ RULESETS.push(
     tier: "div2",
     status: "derived",
     note:
-      "NSE has not published Winter 26 points. Division 2 uses Spring 26's verified ladder (10/7/6/4/2/0), and the " +
-      "table is calculated from NSE results, so it can differ from NSE's own. Four teams win a promotion match " +
-      "each week but only two go up, so \"promoted\" here means in line for it.",
-    ladder: DIV2_LADDER,
+      "Checked against every Division 2 team in Week 3: 7 / 6 / 4 / 3 points by path (a 0–2 team that wins Round 3 gets 3, not Spring's 2). " +
+      "The four teams that win a promotion match go up and the four that lose a relegation match go down to the Swiss; NSE gives " +
+      "no points for those, so 10 and 0 are assumed.",
+    ladder: DIV1_LADDER,
     promotesTo: "div1",
     relegatesTo: "swiss",
     roundStyle: "bracket",
@@ -133,8 +132,8 @@ RULESETS.push(
     tier: "swiss",
     status: "unknown",
     note:
-      "Winter 26 Swiss points are not published and not known: Swiss groups start on 10 / 8 / 6 / 4 points after Stage 1, " +
-      "but the weekly ladder is unconfirmed. The site shows rounds and records only until the NSE sheet has a week tab.",
+      "Swiss points depend on the path and on which of the night's two pods (Group 1 or 2) a team is in, so there is no single ladder: " +
+      "the site shows the points NSE publishes for each week. Swiss groups start Stage 2 on 10 / 8 / 6 / 4 points.",
     ladder: null,
     promotesTo: "div2",
     relegatesTo: null,

@@ -3,10 +3,11 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Dataset, Night, Series, Team, Tier } from "@/lib/domain/types";
 import { rowToSeries } from "@/lib/import/nse-series";
-import type { NseMatchRow, NseTeamRef } from "@/lib/import/nse";
+import type { NseMatchRow, NsePointsSection, NseTeamRef } from "@/lib/import/nse";
+import { pointsCells } from "@/lib/import/nse-points";
 import { nightPageTargets, tierAfterImport } from "@/lib/import/tournaments";
 import { ctxOf, ourTeam, seasonSeries } from "./context";
-import { nightsForSeason } from "./nights";
+import { nightsForSeason, teamNight } from "./nights";
 import { getRuleset } from "./rulesets";
 import { standingsTable } from "./standings";
 
@@ -15,9 +16,10 @@ import { standingsTable } from "./standings";
  * tournaments (snapshots in seed-data/nse). City Champions qualified for Division 1; City Commanders
  * are in the Swiss.
  */
-function load(file: string): NseMatchRow[] {
-  return JSON.parse(readFileSync(join(process.cwd(), "seed-data", "nse", `${file}.json`), "utf8")).rows;
+function snapshot(file: string): { rows: NseMatchRow[]; pointsSections?: NsePointsSection[] } {
+  return JSON.parse(readFileSync(join(process.cwd(), "seed-data", "nse", `${file}.json`), "utf8"));
 }
+const load = (file: string): NseMatchRow[] => snapshot(file).rows;
 
 function winterDataset(): Dataset {
   const files: Array<{ file: string; tier: Tier; stage: "placement" | "league"; week: number }> = [
@@ -43,10 +45,14 @@ function winterDataset(): Dataset {
   };
   const nights: Night[] = [];
   const series: Series[] = [];
+  const externalResults: Dataset["externalResults"] = [];
   for (const f of files) {
     const rows = load(f.file);
     const night: Night = { id: `${f.tier}-${f.week}`, seasonId: "s", tier: f.tier, stage: f.stage, week: f.week, label: f.stage === "placement" ? "Stage 1" : `Week ${f.week}`, date: "2026-11-03", venue: null };
     nights.push(night);
+    for (const cell of pointsCells(snapshot(f.file).pointsSections ?? [], night.id, (ref) => (ref.slug ? team(ref) : undefined))) {
+      externalResults.push({ nightId: cell.night_id, teamId: cell.team_id, points: cell.points, status: cell.status });
+    }
     for (const row of rows) {
       const r = rowToSeries(row, { seasonId: "s", tier: f.tier, night: { id: night.id, stage: f.stage }, teamId: team, seriesId: (id) => `m${id}` });
       if ("series" in r) series.push(r.series);
@@ -65,7 +71,7 @@ function winterDataset(): Dataset {
     ],
     nights,
     series,
-    externalResults: [],
+    externalResults,
     externalStandings: [],
     players: [],
     roster: [],
@@ -81,11 +87,26 @@ const champions = ourTeam(ds, "champions")!;
 const commanders = ourTeam(ds, "commanders")!;
 
 describe("Winter 26 rulesets", () => {
-  it("has a derived ladder for both divisions and none for the Swiss", () => {
-    expect(getRuleset("winter-26", "div1")).toMatchObject({ status: "derived", relegatesTo: "div2", promotesTo: null });
-    expect(getRuleset("winter-26", "div1").ladder).toEqual({ "2-0:W": 10, "2-0:L": 7, "1-1:W": 6, "1-1:L": 4, "0-2:W": 3, "0-2:L": 0 });
-    expect(getRuleset("winter-26", "div2").ladder?.["0-2:W"]).toBe(2);
+  it("has NSE's Division 1 ladder, the same numbers for Division 2, and no single ladder for the Swiss", () => {
+    const ladder = { "2-0:W": 10, "2-0:L": 7, "1-1:W": 6, "1-1:L": 4, "0-2:W": 3, "0-2:L": 0 };
+    expect(getRuleset("winter-26", "div1")).toMatchObject({ status: "verified", relegatesTo: "div2", promotesTo: null });
+    expect(getRuleset("winter-26", "div1").ladder).toEqual(ladder);
+    expect(getRuleset("winter-26", "div2").ladder).toEqual(ladder); // not Spring's 0–2 win = 2
     expect(getRuleset("winter-26", "swiss")).toMatchObject({ status: "unknown", ladder: null });
+  });
+
+  it("agrees with the points NSE published for every team with a number, in both divisions", () => {
+    let checked = 0;
+    for (const night of ds.nights.filter((n) => n.stage === "league" && n.tier !== "swiss")) {
+      for (const team of ds.teams) {
+        const tn = teamNight(ctx, night, team.id);
+        if (!tn?.computed || tn.sheet?.points == null) continue;
+        expect([night.tier, team.name, tn.computed.points]).toEqual([night.tier, team.name, tn.sheet.points]);
+        checked++;
+      }
+    }
+    // 28 of Division 1's 32 teams have a number (four were demoted) and 24 of Division 2's (four promoted, four demoted)
+    expect(checked).toBe(52);
   });
 });
 
@@ -97,7 +118,7 @@ describe("City Champions in Division 1, Week 3", () => {
     expect(seasonSeries(ctx, champions.team.id, "div1").some((s) => s.series.stage === "placement")).toBe(true);
   });
 
-  it("went 0–2 then won the relegation match: 3 points", () => {
+  it("went 0–2 then won the relegation match: 3 points, as NSE published", () => {
     const wk3 = nights[1];
     expect(wk3.rounds.map((r) => [r.label, r.ts.opponent?.name, r.ts.result, `${r.ts.our}–${r.ts.opp}`])).toEqual([
       ["Opener", "Manchester Pookie Pies", "L", "2–3"],
@@ -106,44 +127,48 @@ describe("City Champions in Division 1, Week 3", () => {
     ]);
     expect(wk3.points).toBe(3);
     expect(wk3.pointsSource).toBe("engine");
-    expect(wk3.relegated).toBe(false);
+    expect(wk3.sheet).toMatchObject({ points: 3, status: "played" });
+    expect(wk3.mismatch).toBe(false);
   });
 
-  it("is calculated into a Division 1 table of 32 teams, marked as not NSE's own", () => {
+  it("is a Division 1 table of NSE's weekly points, with the four demoted teams listed as having left", () => {
     const table = standingsTable(ctx, "div1");
-    expect(table.derived).toBe(true);
-    expect(table.rows).toHaveLength(32);
+    expect(table).toMatchObject({ derived: true, source: "nse" });
     expect(table.weeks).toEqual([{ week: 3, label: "WK 3" }]);
+    expect(table.rows).toHaveLength(28);
+    expect(table.departed).toHaveLength(4);
+    expect(table.departed.every((r) => r.cells[3].status === "relegated_out" && r.cells[3].points === null)).toBe(true);
     const ours = table.rows.find((r) => r.isOurs)!;
     expect(ours.total).toBe(3);
-    expect(ours.cells[3]).toMatchObject({ points: 3, status: "played" });
-    // a full Division 1 night hands out these points: 4 teams on 10, 7, 6 ... never more than the ladder allows
-    expect(Math.max(...table.rows.map((r) => r.total))).toBe(10);
-    expect(table.rows.every((r) => [10, 7, 6, 4, 3, 0].includes(r.total))).toBe(true);
-    // four teams lost a relegation match but NSE only moves two a week, so no one is marked as relegated here
-    expect(table.rows.filter((r) => r.total === 0)).toHaveLength(4);
-    expect(table.rows.every((r) => r.cells[3].status === "played")).toBe(true);
-    // sorted best first, positions 1..32
-    expect(table.rows.map((r) => r.position)).toEqual(Array.from({ length: 32 }, (_, i) => i + 1));
+    // 4 teams on 10, 4 on 7, 8 on 6, 8 on 4, 4 on 3
+    const count = (pts: number) => table.rows.filter((r) => r.total === pts).length;
+    expect([10, 7, 6, 4, 3].map(count)).toEqual([4, 4, 8, 8, 4]);
+    expect(table.rows.map((r) => r.position)).toEqual(Array.from({ length: 28 }, (_, i) => i + 1));
     expect(table.rows.map((r) => r.total)).toEqual([...table.rows.map((r) => r.total)].sort((a, b) => b - a));
+    expect(ours.position).toBeGreaterThanOrEqual(25);
   });
 });
 
 describe("City Commanders in the Swiss, Week 3", () => {
   const nights = nightsForSeason(ctx, commanders.team.id, "swiss");
 
-  it("shows Stage 1 and Week 3 with no points (the Swiss ladder is unknown)", () => {
+  it("took 10 Swiss points for going 2–0 and losing Round 3, from NSE's Points round", () => {
     expect(nights.map((n) => n.night.label)).toEqual(["Stage 1", "Week 3"]);
     const wk3 = nights[1];
     expect(wk3.rounds.map((r) => [r.ts.opponent?.name, r.ts.result])).toEqual([["Swansea Slotters", "W"], ["bingo lingo", "W"], ["Herts RL Team 1", "L"]]);
-    expect(wk3.points).toBeNull();
+    expect(wk3.points).toBe(10);
+    expect(wk3.pointsSource).toBe("sheet");
     expect(wk3.path).toBe("Won 2 of 3");
   });
 
-  it("has no calculated table rather than a made-up one", () => {
+  it("is a Swiss table with NSE's points, four promoted teams having left", () => {
     const table = standingsTable(ctx, "swiss");
-    expect(table.derived).toBe(true);
-    expect(table.rows).toEqual([]);
+    expect(table).toMatchObject({ derived: true, source: "nse" });
+    expect(table.departed).toHaveLength(4);
+    const ours = table.rows.find((r) => r.isOurs)!;
+    expect(ours.total).toBe(10);
+    expect(Math.max(...table.rows.map((r) => r.total))).toBe(10);
+    expect(ours.position).toBeLessThanOrEqual(4); // only four teams scored 10
   });
 });
 

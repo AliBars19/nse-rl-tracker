@@ -17,66 +17,14 @@ Read this first. It answers the questions that otherwise get re-asked every sess
 Winter 26 is **already created and current** (`/winter-26/champions`, `/winter-26/commanders`) with both rosters, two scrims and Stage 1
 results. Champions' and Commanders' Week 1 replays are uploaded, Champions' Week 2 (27 Oct) too. Don't re-create the season.
 **Stage 1 is over for Champions: 4 wins from 6 rounds, so Division 1.** Commanders are in Group 3 (10-point Swiss) per the sheet.
-**League week 3 (3 Nov)** is in three NSE tournaments (Division 1, Division 2, Swiss). Champions: Division 1, L 2–3 Manchester Pookie Pies, L 1–3 Diff Diddlers, W 3–2 UWE Sea Stags RL.
-Commanders: Swiss, W 3–0 Swansea Slotters, W 3–1 bingo lingo, L 0–3 Herts RL Team 1. NSE has not published league points: Division 1 and 2 tables are calculated
-from results with Spring's ladders (marked on the page), the Swiss has no points. A City team that changes division is moved automatically when its week is imported.
-
-**Where replays go:** upload them on **our own site**, not on ballchasing: sign in at `/admin` →
-*Replays* → **Sort and upload a night**. Drop every `.replay` file from the night (any names, any order,
-both teams). In the browser the page reads each file's header (start time, score, players, lobby name like
-`NSEMD1G2`), and:
-- if the site has no results for that day yet it **fetches them from NSE itself** (`syncNseForDates` in
-  `src/lib/actions/admin.ts`, the same import as *Imports → NSE matches*; there is also a "Fetch results from NSE" button);
-- works out which team the files are (the series scores they add up to, else roster names, matched loosely so
-  `stav1c` = "Stavic");
-- puts them on the right series and game numbers by matching wins/losses to the series scores. Replays it can only
-  place from the lobby round (e.g. a series with just some of its games saved) are marked **"Ready (guess)"**: check the game number.
-A table shows the result for review; **Upload** then sends them one at a time through our server to ballchasing and saves the stats.
-*Upload to one series* below it is the manual fallback.
-Rocket League replays (`.replay`) only exist on PC (on Linux: the `Demos` folder inside the Wine/Proton prefix).
-The `BALLCHASING_TOKEN` is a Vercel environment variable (server only, added 29 Sep): if it is missing, the
-Replays and Admin pages show a red banner. Claude sessions cannot read Vercel env vars or sign in as admin,
-so Claude cannot upload replays for Ali; it can only read them locally (`src/lib/replay/header.ts`).
-
-**Where results come from:**
-- NSE: https://nse.gg/tournaments/rocket-league-nse-winter-26 (`tournaments.nse.gg` serves the same
-  pages; the importer uses that host). Pages: `/stage-1`, `/matches`, `/teams`, `/schedule`,
-  later `/week-3` … `/week-6`. `parseNseMatchTable` in `src/lib/import/nse.ts` already parses
-  the Winter 26 pages. Import with *Admin → Imports → NSE matches* (page `stage-1`, then `week-N`).
-- Standings sheet ("Week 1 Rocket Standings"): https://docs.google.com/spreadsheets/d/1TQ7WzJ4a8Ku4Jl3hmpx9Kq5WERE3aV1euabSNfyo3To
-  Tabs: **Starting groups** (Groups 1–3, by seed) and **After week 1** (Groups 1–6). It has **no
-  scores or points**, only group membership. Its layout differs from the Spring 26 sheet, so
-  check `src/lib/import/sheet.ts` before using the *Standings sheet* import on it.
-
-**Winter 26 format (from NSE):** Tuesdays 7pm. Weeks 1–2 qualification ("Stage 1", 3 rounds per
-night, 20 and 27 Oct), weeks 3–6 league (3, 10, 17, 24 Nov), week 7–8 playoffs (1 Dec, finals
-5/6 Dec). Stage 2 splits teams into divisions; 2 are relegated and 2 promoted each week.
-155 teams signed up. Seeds: City Champions 9, City Commanders 44.
-
-**Qualification rule (confirmed by Ali and by the sheet's own headings):** 4 wins from the 6 Stage 1 rounds → Division 1; fewer → Swiss.
-The permanent standings sheet is https://docs.google.com/spreadsheets/d/1TQ7WzJ4a8Ku4Jl3hmpx9Kq5WERE3aV1euabSNfyo3To : tabs *Starting groups*, *After week 1*, *After week 2*
-(newest = current). It lists group membership only. After week 2: Group 1 = Division 1, Group 2 = Division 2, Groups 3–6 = Swiss starting on 10 / 8 / 6 / 4 points.
-
-**Week 1 (20 Oct) results** (Week 2 on 27 Oct: Champions W 3–0 Swansea Slotters, L 1–3 Southampton Saver Menu, bye → 4–2, Division 1):
-
-| Team | Round 1 | Round 2 | Round 3 | Group after |
-|---|---|---|---|---|
-| City Champions | W 3–1 NSCG Ghosts | W 3–1 Solent Cardinals | L 0–3 Durham Defenders RL | 2 (needs 2 more wins) |
-| City Commanders | L 1–3 UWE Sea Stags RL | L 0–3 No Execuses | W 3–1 Leic Is More | 3 (needs 3 more wins) |
-
-**Per-game pages, scouting and extra stats (21 Oct 2026):**
-- *Matches*: every game box is clickable (`?series=<id>&game=N`) and shows that game's own scoreboard, with **Watch in 3D** (ballchasing's
-  replay page on its viewer tab, `https://ballchasing.com/replay/<id>#watch`) and **Full stats on ballchasing** links. Only shown when the game has a
-  replay. ballchasing generates its 3D viewer data on demand and may ask visitors to sign in before the viewer loads (the link itself opens the right tab). The links work for *unlisted* and *public* replays, not *private* ones: keep `BALLCHASING_VISIBILITY` at `unlisted` (the default) or `public`
-  in Vercel (a change only affects replays uploaded afterwards).
-- *Scouting*: "Their players vs City" (per-game goals, assists, saves, shots, score, plus top scorer and team averages) from replays of our meetings.
-- *Players*: boost/min, average speed, supersonic % and demos/game from the stats stored with each replay (`player_game_stats.extra`). They are read by a
-  separate, guarded query (`loadGameExtras`), so if it ever fails the site still loads and they show "—".
+**League week 3 (3 Nov)** is in three NSE tournaments (Division 1, Division 2, Swiss). Champions: Division 1, L 2–3 Manchester Pookie Pies, L 1–3 Diff Diddlers, W 3–2 UWE Sea Stags RL = **3 points**.
+Commanders: Swiss, W 3–0 Swansea Slotters, W 3–1 bingo lingo, L 0–3 Herts RL Team 1 = **10 points**. NSE publishes the weekly points as headings in the "Points" round of each week page;
+the importer reads them (docs/points-engine.md). A City team that changes division is moved automatically when its week is imported.
 
 **Replay analysis** (Ali asks for write-ups after each night): method, scripts (`scripts/analysis/`) and findings so far are in **docs/analysis.md**.
 Claude can only run the deep version on raw `.replay` files Ali sends as a zip into the chat; without them it reads ballchasing's public replay pages.
 
-**Not known yet** (see TODO.md): NSE's actual Winter 26 weekly points, the Swiss ladder, and the tiebreaks.
+**Not known yet** (see TODO.md): NSE's tiebreaks (our order is points, series wins, game difference) and what a promoted or demoted team scores.
 
 **Working rules for Claude sessions:** check the live site and `main` before proposing work.
 Don't ask Ali for things already in this README, docs/ or the repo.

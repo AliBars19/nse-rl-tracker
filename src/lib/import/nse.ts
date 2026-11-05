@@ -181,3 +181,47 @@ export function looksLikeForfeit(homeScore: number | null, awayScore: number | n
   const lo = Math.min(homeScore, awayScore);
   return hi === 1 && lo === 0;
 }
+
+// ------------------------------------------------------------------ the "Points" round
+
+/**
+ * A league week page ends with a "Points" round that groups teams under the points NSE gave them that
+ * night ('Upper Division 1 - 10 Points', '8 Swiss Points', ...) or the move they earned ('Promoted to
+ * Division 1', 'Demoted to Swiss'). The match rows in it are 1–0 against a Bye and mean nothing: the
+ * headings are the official weekly points.
+ */
+export interface NsePointsSection {
+  heading: string;
+  /** Points under this heading; null for a promotion or demotion (NSE gives no number). */
+  points: number | null;
+  movement: "promoted" | "relegated" | null;
+  teams: NseTeamRef[];
+}
+
+export function parsePointsHeading(heading: string): { points: number | null; movement: "promoted" | "relegated" | null } {
+  const text = cleanName(heading);
+  if (/^promoted\b/i.test(text)) return { points: null, movement: "promoted" };
+  if (/^(demoted|relegated)\b/i.test(text)) return { points: null, movement: "relegated" };
+  const m = text.match(/(\d+)\s*(?:swiss\s+)?points?\b/i);
+  return { points: m ? Number(m[1]) : null, movement: null };
+}
+
+export function parseNsePointsSections(html: string): NsePointsSection[] {
+  const start = html.search(/id="round-\d+">\s*<h2>Points<\/h2>/);
+  if (start < 0) return [];
+  let seg = html.slice(start);
+  const next = seg.slice(20).search(/id="round-\d+">/);
+  if (next >= 0) seg = seg.slice(0, next + 20);
+
+  const sections: NsePointsSection[] = [];
+  for (const m of seg.matchAll(/<h2>([\s\S]*?)<\/h2>|<tr>([\s\S]*?)<\/tr>/g)) {
+    if (m[1] !== undefined) {
+      const heading = cleanName(stripTags(m[1]));
+      if (heading && heading !== "Points") sections.push({ heading, ...parsePointsHeading(heading), teams: [] });
+    } else if (m[2] !== undefined && sections.length && cell(m[2], "id")) {
+      const team = teamFromCell(cell(m[2], "hometeam"));
+      if (team.slug) sections[sections.length - 1].teams.push(team);
+    }
+  }
+  return sections;
+}

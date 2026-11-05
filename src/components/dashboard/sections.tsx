@@ -440,7 +440,7 @@ export function Standings({ v, limit, fullHref, className = "hidden lg:block" }:
   const cols = `64px minmax(0,1fr) repeat(${t.weeks.length}, 80px) 100px${hasPlayoffs ? " 150px" : ""}`;
   return (
     <Panel aria-labelledby="standings" className={className}>
-      <PanelHeader id="standings" title={`${v.tierName} standings`} right={<span className="text-[13px] text-muted">{t.derived ? "Calculated from NSE results, not NSE's own table" : "Promoted / relegated teams shown as —"}</span>} />
+      <PanelHeader id="standings" title={`${v.tierName} standings`} right={<span className="text-[13px] text-muted">{t.source === "ladder" ? "Calculated from NSE results, not NSE's own table" : t.source === "nse" ? "Weekly points from NSE · order calculated · promoted / relegated teams shown as —" : "Promoted / relegated teams shown as —"}</span>} />
       <div className="overflow-x-auto" tabIndex={0} aria-label={`${v.tierName} standings, scrolls sideways`}>
       <div role="table" aria-label={`${v.tierName} standings`} className="min-w-[720px]">
         <div role="row" className="grid border-b border-line px-6 py-3 text-xs tracking-[0.14em] text-muted" style={{ gridTemplateColumns: cols }}>
