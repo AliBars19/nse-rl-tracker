@@ -22,7 +22,7 @@ export default async function StandingsPage({ params }: PageProps<"/[season]/[te
       <TeamSwitcher options={p.teamOptions} current={p.key} />
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h1 className="m-0 font-display text-4xl font-bold uppercase lg:text-5xl">{v.tierName} standings</h1>
-        <span className="text-text-3">{p.ds.season.name} · from the NSE standings sheet</span>
+        <span className="text-text-3">{p.ds.season.name} · {v.standings.derived ? "calculated from NSE results" : "from the NSE standings sheet"}</span>
       </div>
       <Standings v={v} className="block" />
       {departed.length > 0 && (

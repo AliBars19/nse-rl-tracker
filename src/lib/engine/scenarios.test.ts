@@ -96,7 +96,7 @@ describe("scenarioPreview (seed)", () => {
   it("rebuilds the archived Week 6 preview for City Champions from the final table", () => {
     const champions = ourTeam(ds, "champions")!;
     const p = scenarioPreview(ctx, champions.team.id, "div2")!;
-    expect(p).toMatchObject({ week: 6, weekLabel: "WEEK 6", archived: true, r1Opponent: "Trent Thunders" });
+    expect(p).toMatchObject({ week: 6, weekLabel: "WEEK 6", archived: true, seasonOver: true, r1Opponent: "Trent Thunders" });
     expect(p.scenarios.goingIn.text).toBe("joint 5th · 14 pts");
     expect(p.scenarios.rivals.map((r) => [r.name, r.total])).toEqual([
       ["Portsmouth Pending", 16],

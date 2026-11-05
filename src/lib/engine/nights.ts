@@ -6,7 +6,7 @@
  * record, falling back to the engine. When both exist and disagree, `mismatch` is set.
  */
 import type { ExternalNightResult, Night, Tier } from "@/lib/domain/types";
-import { chronological, fromSide, type Ctx, type TeamSeries } from "./context";
+import { chronological, fromSide, stage1IsShared, type Ctx, type TeamSeries } from "./context";
 import { nightPoints, roundLabel, type NightPoints, type RoundResult } from "./points";
 
 export interface RoundView {
@@ -108,7 +108,7 @@ export function teamNight(ctx: Ctx, night: Night, teamId: string): TeamNight | n
 export function nightsForSeason(ctx: Ctx, teamId: string, trackedTier: Tier): TeamNight[] {
   return ctx.ds.nights
     .filter((n) => n.seasonId === ctx.ds.season.id)
-    .filter((n) => n.stage === "league" || n.tier === trackedTier)
+    .filter((n) => n.stage === "league" || n.tier === trackedTier || stage1IsShared(ctx))
     .map((n) => teamNight(ctx, n, teamId))
     .filter((x): x is TeamNight => !!x && x.rounds.length > 0)
     .sort((a, b) => a.night.week - b.night.week);

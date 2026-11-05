@@ -81,3 +81,8 @@ cannot write; a signed-in non-admin cannot insert or update; the admin can.
 Tournament slugs for Spring 26: Division 2 `rocket-league-nse-spring-26-division-2`,
 Swiss `rocket-league-nse-spring-26` (Stage 1 + Weeks 3–6), Division 1
 `rocket-league-nse-spring-26-division-1`.
+
+Winter 26 tournament slugs: Swiss `rocket-league-nse-winter-26` (Stage 1 + the Swiss league weeks),
+Division 1 `rocket-league-nse-winter-26---division-1`, Division 2 `rocket-league-nse-winter-26---division-2`
+(listed per season in `src/lib/import/tournaments.ts`). The Stage 1 page (`/stage-1`) answers 403 now that Stage 1 is over:
+its results are already in the database, and `seed-data/nse/rocket-league-nse-winter-26--stage-1.json` holds night 1 only.

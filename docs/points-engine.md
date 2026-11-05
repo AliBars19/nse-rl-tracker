@@ -39,6 +39,24 @@ points  = ladder[`${bracket}:${r3}`]
 Where a tier has no ladder the site uses the **NSE sheet's** points and hides Scenarios. For
 Commanders that means every Swiss night shows the sheet value (8 each time, 40 total).
 
+## Winter 26 (league weeks 3–6, from 3 Nov 2026)
+
+NSE has not published the weekly points. What the site does until NSE (or the standings sheet) says otherwise:
+
+| Tier | Status | What is used |
+|---|---|---|
+| Division 1 | derived | Spring 26's Week 3 ladder, 10/7/6/4/3/0 |
+| Division 2 | derived | Spring 26's verified ladder, 10/7/6/4/2/0 |
+| Swiss | unknown | No points: rounds and records only. Swiss groups start Stage 2 on 10 / 8 / 6 / 4 points, but the weekly ladder is not known |
+
+- There is no sheet tab for league weeks yet, so every team's points are **calculated from the imported results** (`derivedStandings` in `standings.ts`), and the table says so
+  ("Calculated from NSE results"). Ties are broken by series wins, then game difference, then name: NSE's tiebreaks are unknown, so positions inside a tie can differ.
+- Each week four teams lose a relegation match (Div 1) or win a promotion match (Div 2) but NSE moves **two** a week, so the site does not mark anyone as moved.
+- Stage 1 is common to everyone (`QUALIFICATION_RULES`), so a team that qualified for Division 1 still shows its Stage 1 night.
+- A City team can change division every week. Importing a week page (Imports → NSE matches, or the replay sorter) moves a City team to the tier it just played in,
+  unless it has already played a later week elsewhere (`tournaments.ts`). The three tournaments of the season are listed in `NSE_TOURNAMENTS`.
+- **To confirm:** City Champions' Week 3 was 0–2 then a Round 3 win = 3 points under the derived Division 1 ladder. If NSE's figure differs, change `DIV1_LADDER` usage in `rulesets.ts`.
+
 ### How Division 2 was verified
 
 `nights.test.ts` runs the engine for every Division 2 team, every week, and compares with the
