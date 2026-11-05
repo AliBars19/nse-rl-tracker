@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { londonTimeToIso, nseKickoffToIso, tournamentSlugFrom } from "./nse";
+import { londonTimeToIso, nseKickoffToIso, parsePointsHeading, tournamentSlugFrom } from "./nse";
 
 describe("UK local time to UTC", () => {
   it("is unchanged in winter (GMT)", () => {
@@ -30,3 +30,13 @@ describe("tournamentSlugFrom", () => {
   });
 });
 
+
+describe("parsePointsHeading", () => {
+  it("reads the points and the moves NSE puts above each group of teams", () => {
+    expect(parsePointsHeading("Upper Division 1 - 10 Points")).toEqual({ points: 10, movement: null });
+    expect(parsePointsHeading("Lower Division 1 - 3 Points")).toEqual({ points: 3, movement: null });
+    expect(parsePointsHeading("8 Swiss Points")).toEqual({ points: 8, movement: null });
+    expect(parsePointsHeading("Promoted to Division 2")).toEqual({ points: null, movement: "promoted" });
+    expect(parsePointsHeading("Demoted to Swiss")).toEqual({ points: null, movement: "relegated" });
+  });
+});

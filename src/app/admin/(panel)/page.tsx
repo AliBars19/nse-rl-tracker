@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminCard, Notice } from "@/components/admin/ui";
 import { NewSeasonForm, SeasonsList } from "@/components/admin/SeasonForm";
+import { NseUpdateButton } from "@/components/admin/NseUpdateButton";
 import { TournamentForm } from "@/components/admin/TournamentForm";
 import { adminDataset } from "@/lib/data/admin";
 import { ctxOf, seasonSeries } from "@/lib/engine/context";
@@ -73,6 +74,13 @@ export default async function AdminHome() {
           champions={ourTeam(ds, "champions")?.teamSeason.nseTournamentSlug ?? ""}
           commanders={ourTeam(ds, "commanders")?.teamSeason.nseTournamentSlug ?? ""}
         />
+      </AdminCard>
+
+      <AdminCard title="Update from NSE" id="nse-update">
+        <p className="m-0 mb-3 text-sm text-text-3">
+          Imports every published results page a City team plays in (all weeks and divisions), with each week&apos;s points, and moves a City team to the division it just played in. Safe to press again.
+        </p>
+        <NseUpdateButton />
       </AdminCard>
 
       <AdminCard title="Seasons" id="seasons">

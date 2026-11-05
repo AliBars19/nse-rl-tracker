@@ -30,11 +30,12 @@ export interface StandingsTable {
   /** Teams that were in the tier this season but left (promoted/relegated). */
   departed: StandingRow[];
   /**
-   * True when there is no NSE sheet for this tier and the table is calculated from results with the
-   * ruleset's ladder. Order and totals can then differ from NSE's own, and ties are broken by
-   * series wins and game difference (NSE's tiebreak rules are not known).
+   * True when there are no NSE sheet rows for this tier and the order is calculated here, with ties broken
+   * by series wins and game difference (NSE's tiebreak rules are not known).
    */
   derived: boolean;
+  /** Where the points come from: the standings sheet, NSE's own "Points" round for each week, or our ladder. */
+  source: "sheet" | "nse" | "ladder";
 }
 
 export function standingsTable(ctx: Ctx, tier: Tier): StandingsTable {
@@ -69,23 +70,29 @@ export function standingsTable(ctx: Ctx, tier: Tier): StandingsTable {
     rows: current,
     departed,
     derived: false,
+    source: "sheet",
   };
 }
 
 /**
- * A tier with no sheet rows (Winter 26 so far): add up each team's calculated league-night points.
- * Only possible when the tier has a ladder; otherwise the table stays empty rather than guessing.
+ * A tier with no sheet rows (Winter 26): add up each team's weekly points. NSE publishes them in each week page's
+ * "Points" round (stored as external night results); a team with no such cell gets the ladder's points when the tier
+ * has one. Without either the table stays empty rather than guessing. The order is ours (points, then series wins,
+ * then game difference), and a team that was promoted or demoted in the tier's latest night has left it.
  */
 function derivedStandings(ctx: Ctx, tier: Tier, nights: Night[]): StandingsTable {
   const league = nights.filter((n) => n.stage === "league");
+  const ladder = ctx.ruleset(tier).ladder;
+  const published = league.some((n) => ctx.ds.externalResults.some((r) => r.nightId === n.id));
   const empty: StandingsTable = {
     tier,
     weeks: league.map((n) => ({ week: n.week, label: `WK ${n.week}` })),
     rows: [],
     departed: [],
     derived: true,
+    source: published ? "nse" : "ladder",
   };
-  if (!ctx.ruleset(tier).ladder || !league.length) return empty;
+  if ((!ladder && !published) || !league.length) return empty;
 
   const teamIds = new Set<string>();
   for (const n of league) {
@@ -94,33 +101,41 @@ function derivedStandings(ctx: Ctx, tier: Tier, nights: Night[]): StandingsTable
       if (s.awayTeamId) teamIds.add(s.awayTeamId);
     }
   }
+  const lastWeek = Math.max(...league.map((n) => n.week));
 
   const built = [...teamIds].map((teamId) => {
     const cells: Record<number, StandingCell> = {};
     let total = 0;
     let seriesWins = 0;
     let gameDiff = 0;
+    let left = false;
     for (const n of league) {
       const tn = teamNight(ctx, n, teamId);
       if (!tn) continue;
-      // Which teams actually move is NSE's call (two each way a week, from four 0–2 or 2–0 winners/losers): not guessed here.
-      cells[n.week] = { points: tn.computed ? tn.computed.points : null, status: "played" as NightStatus };
-      total += tn.computed?.points ?? 0;
+      const nse = tn.sheet;
+      const points = nse ? nse.points : tn.computed ? tn.computed.points : null;
+      const status: NightStatus = nse ? nse.status : "played";
+      cells[n.week] = { points, status };
+      total += points ?? 0;
+      if (n.week === lastWeek && (status === "promoted_out" || status === "relegated_out")) left = true;
       for (const r of tn.rounds) {
         if (r.ts.result === "BYE") continue;
         if (r.ts.result === "W") seriesWins++;
         gameDiff += (r.ts.our ?? 0) - (r.ts.opp ?? 0);
       }
     }
-    return { teamId, cells, total, seriesWins, gameDiff };
+    return { teamId, cells, total, seriesWins, gameDiff, left };
   });
-  built.sort((a, b) => b.total - a.total || b.seriesWins - a.seriesWins || b.gameDiff - a.gameDiff || ctx.team(a.teamId).name.localeCompare(ctx.team(b.teamId).name));
+  const order = (a: (typeof built)[number], b: (typeof built)[number]) =>
+    b.total - a.total || b.seriesWins - a.seriesWins || b.gameDiff - a.gameDiff || ctx.team(a.teamId).name.localeCompare(ctx.team(b.teamId).name);
+  const staying = built.filter((b) => !b.left).sort(order);
+  const leaving = built.filter((b) => b.left).sort(order);
 
-  const rows: StandingRow[] = built.map((b, i) => {
+  const row = (b: (typeof built)[number], position: number | null): StandingRow => {
     const team = ctx.team(b.teamId);
-    return { team, position: i + 1, cells: b.cells, total: b.total, playoffNote: null, isOurs: !!team.ourKey };
-  });
-  return { ...empty, rows };
+    return { team, position, cells: b.cells, total: b.total, playoffNote: null, isOurs: !!team.ourKey };
+  };
+  return { ...empty, rows: staying.map((b, i) => row(b, i + 1)), departed: leaving.map((b) => row(b, null)) };
 }
 
 /** Text for one standings cell: points, or '—' when the team was not in the tier that week. */

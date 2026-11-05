@@ -1,6 +1,14 @@
 {
  "source": "https://tournaments.nse.gg/tournaments/rocket-league-nse-winter-26---division-1/week-3",
- "fetchedAt": "2026-11-05T12:39:04.995Z",
+ "fetchedAt": "2026-11-05T12:58:16.653Z",
+ "pointsSections": [
+  {"heading":"Upper Division 1 - 10 Points","points":10,"movement":null,"teams":[{"slug":"warwick-sour-patch-watermelon","name":"warwick sour patch watermelon"},{"slug":"lanc-lancborghini","name":"lanc lancborghini"},{"slug":"chi-latte","name":"Chi Latte"},{"slug":"roehampton-esports","name":"Roehampton Esports"}]},
+  {"heading":"Upper Division 1 - 7 Points","points":7,"movement":null,"teams":[{"slug":"uobaddies","name":"UoBaddies"},{"slug":"mmu-minotaurs","name":"MMU Minotaurs"},{"slug":"no-execuses","name":"No Execuses"},{"slug":"portsmouth-potatoes-rl","name":"Portsmouth Potatoes RL"}]},
+  {"heading":"Upper Division 1 - 6 Points","points":6,"movement":null,"teams":[{"slug":"nottingham-archers","name":"Nottingham Archers"},{"slug":"portsmouth-paladins-rl","name":"Portsmouth Paladins RL"},{"slug":"durham-defenders-rl","name":"Durham Defenders RL"},{"slug":"trent-titans","name":"Trent Titans"},{"slug":"kcl-lions","name":"KCL Lions"},{"slug":"im-steel-standing","name":"I'm Steel Standing"},{"slug":"diff-diddlers","name":"Diff Diddlers"},{"slug":"the-scouseshooters","name":"the scouseshooters"}]},
+  {"heading":"Lower Division 1 - 4 Points","points":4,"movement":null,"teams":[{"slug":"manchester-pookie-pies","name":"Manchester Pookie Pies"},{"slug":"team-pigeon","name":"Team Pigeon"},{"slug":"southampton-saver-menu","name":"Southampton Saver Menu"},{"slug":"uobeatyoah","name":"UoBeatYoAh"},{"slug":"couldnt-care-leic","name":"Couldnt care Leic"},{"slug":"qmul-esports","name":"QMUL Esports"},{"slug":"northampton-kinetix","name":"Northampton Kinetix"},{"slug":"solent-cardinals","name":"Solent Cardinals"}]},
+  {"heading":"Lower Division 1 - 3 Points","points":3,"movement":null,"teams":[{"slug":"city-champions","name":"City Champions"},{"slug":"loughborough-lions","name":"Loughborough Lions"},{"slug":"exe-it-strategy","name":"Exe-it Strategy"},{"slug":"hallam-hammerheads","name":"Hallam Hammerheads"}]},
+  {"heading":"Demoted to Division 2","points":null,"movement":"relegated","teams":[{"slug":"no-fake-just-miss","name":"No Fake Just Miss"},{"slug":"trent-thunder","name":"Trent Thunder"},{"slug":"brookes-vipers-rl","name":"Brookes Vipers Rl"},{"slug":"uwe-sea-stags-rl","name":"UWE Sea Stags RL"}]}
+ ],
  "rows": [
   {"id":188954,"time":"19:15","date":"3 Nov 26","home":{"slug":"warwick-sour-patch-watermelon","name":"warwick sour patch watermelon"},"away":{"slug":"diff-diddlers","name":"Diff Diddlers"},"homeScore":3,"awayScore":1,"round":"Round 1","venue":"Beckwith Park Night"},
   {"id":188955,"time":"19:15","date":"3 Nov 26","home":{"slug":"the-scouseshooters","name":"the scouseshooters"},"away":{"slug":"no-execuses","name":"No Execuses"},"homeScore":2,"awayScore":3,"round":"Round 1","venue":"Beckwith Park Night"},
