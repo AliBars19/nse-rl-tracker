@@ -47,7 +47,7 @@ detail → players.
 ## Winter 26 (added 21 Oct 2026)
 - [x] Season created on the live site; rosters and two scrims entered
 - [x] Import Week 1 / Stage 1 from NSE (the replay sorter fetches it; Champions finished 4–2 → Division 1, Commanders in Swiss Group 3)
-- [x] Stage 1 qualification (4 wins of 6 rounds for Div 1, confirmed by Ali): dashboard card with wins needed and the six rounds
+- [x] Stage 1 qualification (4 wins of 6 rounds for Div 1, confirmed by Ali; a bye counts as a win): dashboard card with wins needed and the six rounds
 - [x] Winter 26 league weeks: Division 1 / Division 2 ladders derived from Spring, Swiss unknown, standings calculated from results (docs/points-engine.md)
 - [ ] Confirm the Winter 26 points with NSE (Champions' Week 3 = 3 under the derived Div 1 ladder; Commanders' Swiss Week 3 has no known points) and switch to the NSE sheet's week tabs when they appear
 - [ ] Check `src/lib/import/sheet.ts` against the new "Week N Rocket Standings" layout (groups, "Qualified for division 1", Swiss 10/8/6/4 points) before using the sheet import; the permanent sheet is linked in the README

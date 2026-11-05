@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { qualification, type Stage1Result } from "./qualification";
+import type { TeamSeries } from "./context";
+import { qualification, stage1Results, type Stage1Result } from "./qualification";
 
 const RULES = { rounds: 6, winsForDiv1: 4 };
 const r = (round: number, won: boolean): Stage1Result => ({ round, opponent: `Opp ${round}`, won, score: won ? "3–1" : "1–3" });
@@ -58,5 +59,25 @@ describe("Stage 1 qualification (4 wins from 6 rounds for Div 1)", () => {
     const q = qualification([], RULES);
     expect(q).toMatchObject({ played: 0, needed: 4, remaining: 6, status: "alive" });
     expect(q.detail).toBe("Win 4 of the 6 rounds");
+  });
+});
+
+describe("stage1Results", () => {
+  const ts = (round: number, result: "W" | "L" | "BYE"): TeamSeries =>
+    ({
+      series: { stage: "placement", round },
+      opponent: result === "BYE" ? null : { shortName: `Opp ${round}` },
+      our: result === "BYE" ? null : result === "W" ? 3 : 1,
+      opp: result === "BYE" ? null : result === "W" ? 1 : 3,
+      result,
+    }) as unknown as TeamSeries;
+
+  it("counts a bye as a win: Champions finished 3 wins and a bye = 4, qualified", () => {
+    const results = stage1Results([ts(1, "W"), ts(2, "W"), ts(3, "L"), ts(4, "W"), ts(5, "L"), ts(6, "BYE")]);
+    expect(results).toHaveLength(6);
+    expect(results[5]).toMatchObject({ round: 6, won: true, score: "bye" });
+    const q = qualification(results, RULES);
+    expect(q).toMatchObject({ wins: 4, losses: 2, status: "qualified" });
+    expect(q.headline).toBe("Div 1 secured");
   });
 });

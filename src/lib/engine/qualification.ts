@@ -82,15 +82,18 @@ export function qualification(results: Stage1Result[], rules: QualificationRules
   };
 }
 
-/** A team's Stage 1 series as results (byes and unscored series are left out; a forfeit win is still a win). */
+/**
+ * A team's Stage 1 series as results. A bye counts as a win (NSE's sheet put City Champions in Division 1 on
+ * three played wins plus a Round 6 bye); unscored series are left out and a forfeit win is still a win.
+ */
 export function stage1Results(series: TeamSeries[]): Stage1Result[] {
   return series
-    .filter((s) => s.series.stage === "placement" && s.opponent && s.our !== null && s.opp !== null)
+    .filter((s) => s.series.stage === "placement" && (s.result === "BYE" || (s.opponent && s.our !== null && s.opp !== null)))
     .map((s, i) => ({
       round: s.series.round ?? i + 1,
-      opponent: s.opponent!.shortName,
-      won: (s.our ?? 0) > (s.opp ?? 0),
-      score: `${s.our}–${s.opp}`,
+      opponent: s.opponent?.shortName ?? "Bye (counts as a win)",
+      won: s.result === "BYE" || (s.our ?? 0) > (s.opp ?? 0),
+      score: s.result === "BYE" ? "bye" : `${s.our}–${s.opp}`,
     }))
     .sort((a, b) => a.round - b.round);
 }
