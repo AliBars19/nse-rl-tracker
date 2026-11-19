@@ -9,7 +9,7 @@ Rocket League teams in the NSE (National Student Esports) weekly tournament:
 Public to read; one admin (Ali) enters results and uploads replays. Built with Next.js 16
 (App Router), Supabase (Postgres + Auth + RLS) and the ballchasing.com API, hosted on Vercel.
 
-## Start here: current state (Winter 26, as of 5 Nov 2026)
+## Start here: current state (Winter 26, as of 19 Nov 2026)
 
 Read this first. It answers the questions that otherwise get re-asked every session.
 
@@ -20,11 +20,15 @@ results. Champions' and Commanders' Week 1 replays are uploaded, Champions' Week
 **League week 3 (3 Nov)** is in three NSE tournaments (Division 1, Division 2, Swiss). Champions: Division 1, L 2–3 Manchester Pookie Pies, L 1–3 Diff Diddlers, W 3–2 UWE Sea Stags RL = **3 points**.
 Commanders: Swiss, W 3–0 Swansea Slotters, W 3–1 bingo lingo, L 0–3 Herts RL Team 1 = **10 points**. NSE publishes the weekly points as headings in the "Points" round of each week page;
 the importer reads them (docs/points-engine.md). A City team that changes division is moved automatically when its week is imported.
+**Weeks 4 (10 Nov) and 5 (17 Nov)** are published too (Division 1 and Swiss pages; Week 6 is 24 Nov). Champions (Division 1): W4 L 0–3 Couldnt care Leic, W 3–2 Plymouth Leviathans, L 0–3 Essex Blades = **3**;
+W5 W 3–2 QMUL Esports, W 3–1 Nottingham Archers, L 0–3 I'm Steel Standing = **6**; 12 in all, 23rd of 30. Commanders (Swiss): W4 W 1–0 UCL Calavera (forfeit), L 1–3 bingo lingo, W 3–1 Southampton Spitfires = **8**;
+W5 W 3–0 UoB Pigeons, W 3–2 CMET Archers, L 2–3 Herts RL Team 1 = **10**; 38 in all including Stage 1's 10, 3rd in the Swiss. These need **Admin → Overview → Update from NSE** to reach the site.
+**The Stage 2 standings sheet is private** (not link-shared), so the app cannot fetch it: download a tab (File → Download → CSV) and paste it on Admin → Imports → Standings sheet.
 
 **Replay analysis** (Ali asks for write-ups after each night): method, scripts (`scripts/analysis/`) and findings so far are in **docs/analysis.md**.
 Claude can only run the deep version on raw `.replay` files Ali sends as a zip into the chat; without them it reads ballchasing's public replay pages.
 
-**Not known yet** (see TODO.md): NSE's tiebreaks (our order is points, series wins, game difference) and what a promoted or demoted team scores.
+**Not known yet** (see TODO.md): what a promoted or demoted team scores. Ties in a derived table are broken by the latest week's points, then earlier weeks (matches NSE's Division 1 order in Weeks 3–5).
 
 **Working rules for Claude sessions:** check the live site and `main` before proposing work.
 Don't ask Ali for things already in this README, docs/ or the repo.

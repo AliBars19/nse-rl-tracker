@@ -9,7 +9,7 @@ type TierKey = "div1" | "div2" | "swiss";
 const TIERS: Array<[TierKey, string]> = [["div2", "Division 2"], ["swiss", "Swiss"], ["div1", "Division 1"]];
 
 export function SheetImport() {
-  const [tier, setTier] = useState<TierKey>("div2");
+  const [tier, setTier] = useState<TierKey>("div1");
   const [csv, setCsv] = useState("");
   const [preview, setPreview] = useState<ActionResult<SheetPreview> | null>(null);
   const [pending, start] = useTransition();
@@ -30,7 +30,7 @@ export function SheetImport() {
             {TIERS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         </Field>
-        <Field label="Or paste CSV" htmlFor="sheet-csv" hint="Leave empty to download the tab from the public Google Sheet.">
+        <Field label="Or paste CSV" htmlFor="sheet-csv" hint="Open the tab in Google Sheets, File → Download → Comma-separated values, and paste the text. (Winter 26's sheet is not link-shared, so it cannot be downloaded for you.)">
           <textarea id="sheet-csv" rows={3} className="border border-line-strong bg-inset p-3 font-mono text-xs text-text" value={csv} onChange={(e) => setCsv(e.target.value)} />
         </Field>
       </div>

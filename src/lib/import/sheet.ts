@@ -102,6 +102,10 @@ export function parseCell(raw: string, tabTier: Tier, week: number): SheetCell &
   const target = tierIn(text);
   const promoted = /promot/i.test(text);
   const demoted = /demot|relegat/i.test(text);
+  // The Winter 26 Swiss tab says just "Promoted" (to Division 2): with no tier named it is the team leaving this tab.
+  if ((promoted || demoted) && !target) {
+    return { week, points: null, status: promoted ? "promoted_out" : "relegated_out", raw };
+  }
   if ((promoted || demoted) && target) {
     const arrived = target === tabTier;
     const status: NightStatus = promoted
@@ -164,9 +168,16 @@ export function shortPlayoffNote(note: string | null): string {
     .trim();
 }
 
-export const SHEET_ID = "1obgH4V6-QKiJsIEeBDrtlSibw3XbBlEcq3_6XPuREzg";
-export const SHEET_GIDS: Record<Tier, string> = { div1: "915740849", div2: "427419427", swiss: "2071657847" };
+/**
+ * Winter 26 "Stage 2 Standings" (Weeks 3–6; the Swiss tab also has Stage 1). It is NOT link-shared, so its CSV cannot be downloaded
+ * by the site: download each tab (File → Download → Comma-separated values) and paste it into Admin → Imports → Standings sheet.
+ * The tab layouts are the same as Spring's, so SPRING_26_LAYOUTS (generic enough) parse it.
+ */
+export const SHEET_ID = "12o8R8tfnraxkI3ZF4_s_pcd_WXKDOB6NUFj1a3Y3Ve4";
+export const SHEET_GIDS: Partial<Record<Tier, string>> = {};
 
-export function sheetCsvUrl(tier: Tier, sheetId = SHEET_ID, gids = SHEET_GIDS): string {
-  return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gids[tier]}`;
+/** The CSV export URL for a tab, or null when we do not know its gid (then the CSV has to be pasted). */
+export function sheetCsvUrl(tier: Tier, sheetId = SHEET_ID, gids: Partial<Record<Tier, string>> = SHEET_GIDS): string | null {
+  const gid = gids[tier];
+  return gid ? `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}` : null;
 }

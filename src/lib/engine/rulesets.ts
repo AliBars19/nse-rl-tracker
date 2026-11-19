@@ -103,11 +103,11 @@ RULESETS.push(
   {
     seasonSlug: "winter-26",
     tier: "div1",
-    status: "verified",
+    status: "unknown",
     note:
-      "Checked against every Division 1 team in Week 3: NSE's Points round gives 10 / 7 / 6 / 4 / 3 points by path and sends the " +
-      "four teams that lose a relegation match down to Division 2.",
-    ladder: DIV1_LADDER,
+      "Week 3 paid 10 / 7 / 6 / 4 / 3 by path (checked against all 32 teams). From Week 4 Division 1 plays as two pods, upper (15 / 12 / 11 / 9 / 8) " +
+      "and lower (6 / 5 / 3 / 2, the bottom two going down), so there is no single ladder: the site shows the points NSE publishes for each week.",
+    ladder: null,
     promotesTo: null,
     relegatesTo: "div2",
     roundStyle: "bracket",

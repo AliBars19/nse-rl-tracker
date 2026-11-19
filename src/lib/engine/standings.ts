@@ -30,12 +30,14 @@ export interface StandingsTable {
   /** Teams that were in the tier this season but left (promoted/relegated). */
   departed: StandingRow[];
   /**
-   * True when there are no NSE sheet rows for this tier and the order is calculated here, with ties broken
-   * by series wins and game difference (NSE's tiebreak rules are not known).
+   * True when there are no NSE sheet rows for this tier and the order is calculated here (ties: most recent week's points first,
+   * which reproduces NSE's Division 1 order for Weeks 3–5).
    */
   derived: boolean;
   /** Where the points come from: the standings sheet, NSE's own "Points" round for each week, or our ladder. */
   source: "sheet" | "nse" | "ladder";
+  /** A caveat to show with the table (the Swiss totals lack Stage 1's starting points until the sheet is imported). */
+  note?: string;
 }
 
 export function standingsTable(ctx: Ctx, tier: Tier): StandingsTable {
@@ -126,8 +128,17 @@ function derivedStandings(ctx: Ctx, tier: Tier, nights: Night[]): StandingsTable
     }
     return { teamId, cells, total, seriesWins, gameDiff, left };
   });
-  const order = (a: (typeof built)[number], b: (typeof built)[number]) =>
-    b.total - a.total || b.seriesWins - a.seriesWins || b.gameDiff - a.gameDiff || ctx.team(a.teamId).name.localeCompare(ctx.team(b.teamId).name);
+  // Ties: NSE's own Division 1 order (Weeks 3–5) is explained by "most recent week's points first, then the week before"; after that we
+  // fall back on series wins, game difference and name (not known to be NSE's).
+  const weeksDesc = league.map((n) => n.week).sort((x, y) => y - x);
+  const order = (a: (typeof built)[number], b: (typeof built)[number]) => {
+    if (b.total !== a.total) return b.total - a.total;
+    for (const w of weeksDesc) {
+      const d = (b.cells[w]?.points ?? 0) - (a.cells[w]?.points ?? 0);
+      if (d) return d;
+    }
+    return b.seriesWins - a.seriesWins || b.gameDiff - a.gameDiff || ctx.team(a.teamId).name.localeCompare(ctx.team(b.teamId).name);
+  };
   const staying = built.filter((b) => !b.left).sort(order);
   const leaving = built.filter((b) => b.left).sort(order);
 
@@ -135,7 +146,8 @@ function derivedStandings(ctx: Ctx, tier: Tier, nights: Night[]): StandingsTable
     const team = ctx.team(b.teamId);
     return { team, position, cells: b.cells, total: b.total, playoffNote: null, isOurs: !!team.ourKey };
   };
-  return { ...empty, rows: staying.map((b, i) => row(b, i + 1)), departed: leaving.map((b) => row(b, null)) };
+  const note = tier === "swiss" ? "Stage 1 starting points (10 / 8 / 6 / 4) are only in NSE's standings sheet, so these totals are lower than NSE's until it is imported." : undefined;
+  return { ...empty, rows: staying.map((b, i) => row(b, i + 1)), departed: leaving.map((b) => row(b, null)), note };
 }
 
 /** Text for one standings cell: points, or '—' when the team was not in the tier that week. */

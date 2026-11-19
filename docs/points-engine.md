@@ -33,7 +33,7 @@ points  = ladder[`${bracket}:${r3}`]
 | Tier | Status | Ladder |
 |---|---|---|
 | **Division 2** | verified | 2–0 win R3 **10** (promoted) · 2–0 lose R3 **7** · 1–1 win **6** · 1–1 lose **4** · 0–2 win **2** · 0–2 lose **0** (relegated to Swiss) |
-| Division 1 | derived, not modelled | Week 3: 10/7/6/4/3/0. From Week 4 Division 1 split into two groups: **upper** 15/12/11/9/8/6 and **lower** 8/6/5/3/2/0 |
+| Division 1 | not modelled (no engine ladder; points are NSE's) | Week 3: 10/7/6/4/3/0. From Week 4 Division 1 is two pods: **upper** 15/12/11/9/8 and **lower** 6/5/3/2 (2 teams demoted) |
 | Swiss | unknown | Not a clean path ladder: 2 wins scored 8 or 7, 1 win 7 or 5, 0 wins 5 or 3; 3–0 teams play a promotion match (Round 4). |
 
 Where a tier has no ladder the site uses the **NSE sheet's** points and hides Scenarios. For
@@ -44,8 +44,8 @@ Commanders that means every Swiss night shows the sheet value (8 each time, 40 t
 **NSE does publish the weekly points**, just not in a table: the last round of each week page ("Points", e.g. the `#round-10523` link NSE posts) lists the teams
 under headings such as `Upper Division 1 - 10 Points`, `8 Swiss Points`, `Promoted to Division 1`, `Demoted to Swiss`. Its match rows (1–0 against a Bye) mean nothing; the
 headings are the points. `parseNsePointsSections` (`src/lib/import/nse.ts`) reads them and the NSE import stores each team's number as an `external_night_results` cell, the same
-table the standings sheet fills, so everyone's points are NSE's own. The standings table is then built from those cells (`derivedStandings` in `standings.ts`); the order is ours
-(points, then series wins, then game difference) because NSE's tiebreaks are unknown.
+table the standings sheet fills, so everyone's points are NSE's own. The standings table is then built from those cells (`derivedStandings` in `standings.ts`); ties are broken by
+the most recent week's points, then the weeks before, then series wins, game difference and name. That reproduces NSE's own Division 1 order for Weeks 3–5 (checked against the sheet's 30 teams).
 
 What Week 3 showed (checked against every team, `winter26.test.ts`):
 
@@ -56,7 +56,9 @@ What Week 3 showed (checked against every team, `winter26.test.ts`):
 | Swiss | depends on the path **and on the pod** (Round 1 shows "Group 1" and "Group 2"): Group 1 2–0 lose 10, 1–1 win 8, 1–1 lose 7, 0–2 win 7, 0–2 lose 5, 2–0 win *Promoted to Division 2* (4 teams); Group 2 2–0 win 8, 2–0 lose 7, 1–1 win 7, 1–1 lose 5, 0–2 win 5, 0–2 lose 3 | |
 
 - Promotions and demotions carry no number, so those teams have a status and no points that week and are listed as having left the tier. The engine assumes 10 and 0 for them (Spring's), which only matters for City's own night.
-- The Swiss has no single ladder, so it has none in `rulesets.ts` and every Swiss number is NSE's. Swiss groups also start Stage 2 on 10 / 8 / 6 / 4 points; those starting points are not in the totals.
+- **Weeks 4 and 5**: Division 1 is two pods (upper 15 / 12 / 11 / 9 / 8, lower 6 / 5 / 3 / 2, two teams demoted), so Division 1 has no ladder in `rulesets.ts` and City's Division 1 points are NSE's number (Champions: 3 in Week 4 and 6 in Week 5, both from the lower pod).
+  Division 2 pays 10 / 7 / 6 / 4 / 3 and the Swiss 10 / 8 / 7 / 5 / 3 / 1 (Commanders: 8 and 10).
+- The Swiss has no single ladder, so it has none in `rulesets.ts` and every Swiss number is NSE's. Swiss groups also start Stage 2 on 10 / 8 / 6 / 4 points; those starting points exist only in NSE's standings sheet, so a Swiss table built from the weekly points alone is short by that much (the table says so) until the Swiss tab is imported.
 - Stage 1 is common to everyone (`QUALIFICATION_RULES`), so a team that qualified for Division 1 still shows its Stage 1 night. A bye in Stage 1 counts as a win.
 - A City team can change division every week. Importing a week page (Imports → NSE matches, or the replay sorter) moves a City team to the tier it just played in, unless it has already
   played a later week elsewhere (`tournaments.ts`). The three tournaments of the season are listed in `NSE_TOURNAMENTS`.

@@ -402,7 +402,9 @@ export interface SheetPreview {
 
 async function loadCsv(tier: Tier, pasted: string | null): Promise<string> {
   if (pasted?.trim()) return pasted;
-  const res = await fetch(sheetCsvUrl(tier), { cache: "no-store", redirect: "follow" });
+  const url = sheetCsvUrl(tier);
+  if (!url) throw new Error("This sheet is not link-shared, so it cannot be downloaded: open the tab in Google Sheets, File → Download → Comma-separated values, and paste the text here.");
+  const res = await fetch(url, { cache: "no-store", redirect: "follow" });
   if (!res.ok) throw new Error(`Could not download the sheet (${res.status}). Paste the CSV instead.`);
   return res.text();
 }

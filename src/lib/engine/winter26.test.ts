@@ -8,6 +8,7 @@ import { pointsCells } from "@/lib/import/nse-points";
 import { nightPageTargets, tierAfterImport } from "@/lib/import/tournaments";
 import { ctxOf, ourTeam, seasonSeries } from "./context";
 import { nightsForSeason, teamNight } from "./nights";
+import { nightPoints } from "./points";
 import { getRuleset } from "./rulesets";
 import { standingsTable } from "./standings";
 
@@ -21,13 +22,20 @@ function snapshot(file: string): { rows: NseMatchRow[]; pointsSections?: NsePoin
 }
 const load = (file: string): NseMatchRow[] => snapshot(file).rows;
 
-function winterDataset(): Dataset {
+const WEEK_DATES: Record<number, string> = { 3: "2026-11-03", 4: "2026-11-10", 5: "2026-11-17" };
+
+/** The season as imported up to `lastWeek` (3 to 5). Division 2 has no Week 4/5 snapshot (City are not in it). */
+function winterDataset(lastWeek: number): Dataset {
   const files: Array<{ file: string; tier: Tier; stage: "placement" | "league"; week: number }> = [
     { file: "rocket-league-nse-winter-26--stage-1", tier: "swiss", stage: "placement", week: 1 },
     { file: "rocket-league-nse-winter-26---division-1--week-3", tier: "div1", stage: "league", week: 3 },
     { file: "rocket-league-nse-winter-26---division-2--week-3", tier: "div2", stage: "league", week: 3 },
     { file: "rocket-league-nse-winter-26--week-3", tier: "swiss", stage: "league", week: 3 },
   ];
+  for (const week of [4, 5].filter((w) => w <= lastWeek)) {
+    files.push({ file: `rocket-league-nse-winter-26---division-1--week-${week}`, tier: "div1", stage: "league", week });
+    files.push({ file: `rocket-league-nse-winter-26--week-${week}`, tier: "swiss", stage: "league", week });
+  }
   const teams = new Map<string, Team>();
   const team = (ref: NseTeamRef): string => {
     const key = ref.slug ?? `name:${ref.name}`;
@@ -48,7 +56,7 @@ function winterDataset(): Dataset {
   const externalResults: Dataset["externalResults"] = [];
   for (const f of files) {
     const rows = load(f.file);
-    const night: Night = { id: `${f.tier}-${f.week}`, seasonId: "s", tier: f.tier, stage: f.stage, week: f.week, label: f.stage === "placement" ? "Stage 1" : `Week ${f.week}`, date: "2026-11-03", venue: null };
+    const night: Night = { id: `${f.tier}-${f.week}`, seasonId: "s", tier: f.tier, stage: f.stage, week: f.week, label: f.stage === "placement" ? "Stage 1" : `Week ${f.week}`, date: f.stage === "placement" ? "2026-10-20" : WEEK_DATES[f.week], venue: null };
     nights.push(night);
     for (const cell of pointsCells(snapshot(f.file).pointsSections ?? [], night.id, (ref) => (ref.slug ? team(ref) : undefined))) {
       externalResults.push({ nightId: cell.night_id, teamId: cell.team_id, points: cell.points, status: cell.status });
@@ -81,27 +89,29 @@ function winterDataset(): Dataset {
   };
 }
 
-const ds = winterDataset();
+const ds = winterDataset(3);
 const ctx = ctxOf(ds);
 const champions = ourTeam(ds, "champions")!;
 const commanders = ourTeam(ds, "commanders")!;
 
 describe("Winter 26 rulesets", () => {
-  it("has NSE's Division 1 ladder, the same numbers for Division 2, and no single ladder for the Swiss", () => {
-    const ladder = { "2-0:W": 10, "2-0:L": 7, "1-1:W": 6, "1-1:L": 4, "0-2:W": 3, "0-2:L": 0 };
-    expect(getRuleset("winter-26", "div1")).toMatchObject({ status: "verified", relegatesTo: "div2", promotesTo: null });
-    expect(getRuleset("winter-26", "div1").ladder).toEqual(ladder);
-    expect(getRuleset("winter-26", "div2").ladder).toEqual(ladder); // not Spring's 0–2 win = 2
+  const WEEK_3 = { "2-0:W": 10, "2-0:L": 7, "1-1:W": 6, "1-1:L": 4, "0-2:W": 3, "0-2:L": 0 } as const;
+
+  it("has no single Division 1 ladder (two pods from Week 4), the Division 2 ladder, and none for the Swiss", () => {
+    expect(getRuleset("winter-26", "div1")).toMatchObject({ status: "unknown", ladder: null, relegatesTo: "div2", promotesTo: null });
+    expect(getRuleset("winter-26", "div2").ladder).toEqual(WEEK_3); // not Spring's 0–2 win = 2
     expect(getRuleset("winter-26", "swiss")).toMatchObject({ status: "unknown", ladder: null });
   });
 
-  it("agrees with the points NSE published for every team with a number, in both divisions", () => {
+  it("Week 3 Division 1 paid 10 / 7 / 6 / 4 / 3 by path, as NSE published it, for every team with a number; Division 2 agrees with the ladder", () => {
     let checked = 0;
     for (const night of ds.nights.filter((n) => n.stage === "league" && n.tier !== "swiss")) {
       for (const team of ds.teams) {
         const tn = teamNight(ctx, night, team.id);
-        if (!tn?.computed || tn.sheet?.points == null) continue;
-        expect([night.tier, team.name, tn.computed.points]).toEqual([night.tier, team.name, tn.sheet.points]);
+        if (tn?.sheet?.points == null || tn.rounds.length < 3) continue;
+        const [r1, r2, r3] = [1, 2, 3].map((n) => tn.rounds.find((r) => r.round === n)!.ts.result);
+        const np = nightPoints(r1, r2, r3, WEEK_3);
+        expect([night.tier, team.name, np.points]).toEqual([night.tier, team.name, tn.sheet.points]);
         checked++;
       }
     }
@@ -126,7 +136,7 @@ describe("City Champions in Division 1, Week 3", () => {
       ["Relegation match", "UWE Sea Stags RL", "W", "3–2"],
     ]);
     expect(wk3.points).toBe(3);
-    expect(wk3.pointsSource).toBe("engine");
+    expect(wk3.pointsSource).toBe("sheet"); // NSE's published number: Division 1 has no single ladder
     expect(wk3.sheet).toMatchObject({ points: 3, status: "played" });
     expect(wk3.mismatch).toBe(false);
   });
@@ -169,6 +179,50 @@ describe("City Commanders in the Swiss, Week 3", () => {
     expect(ours.total).toBe(10);
     expect(Math.max(...table.rows.map((r) => r.total))).toBe(10);
     expect(ours.position).toBeLessThanOrEqual(4); // only four teams scored 10
+  });
+});
+
+describe("Weeks 4 and 5", () => {
+  const ds5 = winterDataset(5);
+  const ctx5 = ctxOf(ds5);
+  const champs = ourTeam(ds5, "champions")!;
+  const cmdrs = ourTeam(ds5, "commanders")!;
+
+  it("Champions took 3 then 6 points in Division 1 (12 in all), as NSE published", () => {
+    const nights = nightsForSeason(ctx5, champs.team.id, "div1");
+    expect(nights.map((n) => n.night.label)).toEqual(["Stage 1", "Week 3", "Week 4", "Week 5"]);
+    expect(nights.slice(1).map((n) => [n.points, n.pointsSource])).toEqual([[3, "sheet"], [3, "sheet"], [6, "sheet"]]);
+    expect(nights[2].rounds.map((r) => [r.ts.opponent?.name, r.ts.result, `${r.ts.our}–${r.ts.opp}`])).toEqual([
+      ["Couldnt care Leic", "L", "0–3"],
+      ["Plymouth Leviathans", "W", "3–2"],
+      ["Essex Blades (A)", "L", "0–3"],
+    ]);
+    expect(nights[3].rounds.map((r) => [r.ts.opponent?.name, r.ts.result])).toEqual([["QMUL Esports", "W"], ["Nottingham Archers", "W"], ["I'm Steel Standing", "L"]]);
+  });
+
+  it("Commanders took 8 then 10 Swiss points; a forfeit counts as the win it was", () => {
+    const nights = nightsForSeason(ctx5, cmdrs.team.id, "swiss");
+    expect(nights.map((n) => n.night.label)).toEqual(["Stage 1", "Week 3", "Week 4", "Week 5"]);
+    expect(nights.slice(1).map((n) => n.points)).toEqual([10, 8, 10]);
+    expect(nights[2].rounds.map((r) => [r.ts.opponent?.name, r.ts.result])).toEqual([["UCL Calavera", "W"], ["bingo lingo", "L"], ["Southampton Spitfires", "W"]]);
+  });
+
+  it("orders the Division 1 table by total, then the latest week's points, as NSE's sheet does", () => {
+    const table = standingsTable(ctx5, "div1");
+    expect(table.weeks.map((w) => w.week)).toEqual([3, 4, 5]);
+    const ours = table.rows.find((r) => r.isOurs)!;
+    expect(ours.total).toBe(12);
+    expect(ours.cells[5]).toMatchObject({ points: 6 });
+    for (let i = 1; i < table.rows.length; i++) {
+      const [a, b] = [table.rows[i - 1], table.rows[i]];
+      expect(a.total).toBeGreaterThanOrEqual(b.total);
+      if (a.total === b.total) expect(a.cells[5]?.points ?? 0).toBeGreaterThanOrEqual(b.cells[5]?.points ?? 0);
+    }
+  });
+
+  it("warns that Swiss totals lack Stage 1's starting points; Division 1 has no such note", () => {
+    expect(standingsTable(ctx5, "swiss").note).toMatch(/Stage 1 starting points/);
+    expect(standingsTable(ctx5, "div1").note).toBeUndefined();
   });
 });
 
