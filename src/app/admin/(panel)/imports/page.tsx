@@ -18,7 +18,7 @@ export default async function ImportsAdmin() {
       </AdminCard>
       <AdminCard title="Standings sheet" id="sheet">
         <p className="m-0 text-sm text-text-3">
-          Other teams&apos; weekly points and NSE&apos;s table order come from the public standings sheet. Status cells
+          Other teams&apos; weekly points and NSE&apos;s table order come from the standings sheet (paste one tab at a time: Division 1 and Swiss are the ones City plays in). Status cells
           (“Promoted to Div 1”) are stored as events, not points. The import replaces this tier&apos;s sheet data.
         </p>
         <SheetImport />
